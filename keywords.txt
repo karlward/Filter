@@ -12,8 +12,11 @@ Filter	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-read   KEYWORD2
+maximum   KEYWORD2
 mean   KEYWORD2
 median   KEYWORD2
+minimum   KEYWORD2
+mode   KEYWORD2
+prepend   KEYWORD2
 stdev   KEYWORD2
 
