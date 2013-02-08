@@ -1,0 +1,25 @@
+Filter is based on an earlier Arduino Library project named SuperSensor.  
+SuperSensor was created by Karl Ward as part of a project for the NYU ITP 
+course "Introduction to Physical Computing" in Fall 2012.   
+
+Filter used scaffold code from: 
+- http://arduino.cc/en/Hacking/LibraryTutorial (public domain example)
+
+Filter owes an obvious debt to the Arduino smoothing tutorials, and Tom Igoe's 
+teaching on the topics of smoothing and averaging.  
+
+The following people have directly assisted the coding efforts by writing 
+code, submitting feature requests or bug reports, or participating in the 
+design: 
+- Tom Igoe
+- Surya Mattu
+- Dustyn Roberts
+
+The following people have contributed advice, or worked on projects related to 
+Filter: 
+- Andrew Cerrito
+- Jon Wasserman
+
+The Arduino base libraries were also consulted for learning purposes, but no 
+code was incorporated from those sources.
+
