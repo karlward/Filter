@@ -42,8 +42,8 @@ class Filter {
     int median(); 
     // int mode(); 
     float stdev(); 
-    maximum(); // should it be named ceiling? 
-    minimum(); // should it be named floor? 
+    maximum(); // relative and absolute, or just absolute?
+    minimum(); // relative and absolute, or just absolute?
     // lowpass(); // Q arg? filter algorithm? return type? 
     // bandpass(); 
     // highpass(); 
