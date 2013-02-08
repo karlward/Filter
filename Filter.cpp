@@ -1,8 +1,9 @@
 /**
  * Filter - Arduino data filtering library
  * 
- * Filter provides easy access to mean, median, and standard deviation for 
- * a configurable number of recent values. 
+ * The Filter library provides Arduino programmers with data filtering 
+ * operations via basic statistic methods (e.g. mean, median, standard 
+ * deviation) for a configurable number of recent values. 
  * 
  * Copyright 2012-2013 Karl Ward
  * See the file CREDITS for details on external code referenced/incorporated
