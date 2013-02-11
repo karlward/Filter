@@ -40,17 +40,16 @@ class Filter {
     void prepend(int value); // not in love with the name "prepend"
     int mean(); 
     int median(); 
-    // int mode(); 
+    int mode(); 
     float stdev(); 
-    maximum(); // relative and absolute, or just absolute?
-    minimum(); // relative and absolute, or just absolute?
+    int maximum(); // relative and absolute, or just absolute?
+    int minimum(); // relative and absolute, or just absolute?
     // lowpass(); // Q arg? filter algorithm? return type? 
     // bandpass(); 
     // highpass(); 
     // totalMean(); // mean of all values ever stored, not just moving average
     // signalToNoise(); 
     // what about chaining filters? probably not essential
-    // distinct(); // return distinct values with no duplicates 
   private:
     //byte _type;
     int _sampleSize;
@@ -66,6 +65,8 @@ class Filter {
     void _orderedInsert(int value, int pos);
     int _maximum; 
     int _minimum; 
+    void _distinct(); // return distinct values with no duplicates 
+    int _distinctValues[];
 };
 
 #endif

@@ -29,7 +29,7 @@
 #include "Filter.h"
 
 // Constructor
-Filter::Filter(byte type, int sampleSize) {
+Filter::Filter(int sampleSize) {
   _sampleSize = sampleSize; // how many values to use for mean, median, etc. 
   int _values[_sampleSize]; // create array of specified size
   _valuesCount = 0; // no values stored yet
@@ -132,60 +132,87 @@ void Filter::_orderedInsert(int value, int pos) {
   }
 } 
 
-int Filter::mode() { 
+// there will probably be a public distinct() method soon
+void Filter::_distinct() { 
   median(); // make sure the values are in order
 
-  // FIXME: this is a naive implementation, need a 3D array 
-  int modeHash[_sampleSize][2]; // FIXME: wastes memory, need distinct()
+  // naive implementation requiring two passes, avoiding malloc
+  int distinctCount = 0; 
+  int currentValue; 
 
-  // currentValue and currentCount track each value as counts are made
-  int currentValue = _medianValues[0]; // start at the beginning
-  int currentCount = 1; 
+  for (int i=0; i < _medianValuesCount; i++) { 
+    if ((i == 0) || (_medianValues[i] != currentValue)) { 
+      distinctCount++; 
+      currentValue = _medianValues[i]; 
+    } 
+  } 
+  // create an array of just the right size
+  int _distinctValues[distinctCount]; 
+  // j is an index into _distinctValues
+  int j = 0; 
+  for (int i=0; i < _medianValuesCount; i++) { 
+    if ((i == 0) || (_medianValues[i] != currentValue)) { 
+      currentValue = _medianValues[i]; 
+      _distinctValues[j] = _medianValues[i]; 
+      j++; 
+    }
+  }
+}
 
-  // largestValue and largestCount are most common value seen so far
-  int largestValue = currentValue; // start at the beginning
-  int largestCount = currentCount;
+int Filter::mode() { 
+  median(); // make sure the values are in order
+  _distinct(); // make sure _distinctValues is populated
+  int _distinctSize = (sizeof(_distinctValues) / sizeof(int)); 
+
+  // store the count for each distinct element in a multidimensional array
+  int modeHash[_distinctSize][2]; 
+  int modeHashIndex = 0; 
+
+  int currentValue;
 
   // count number of each value in _medianValues array
-  for (int i=1; i < _medianValuesCount; i++) { 
-    if (currentCount > largestCount) { 
-      largestValue = currentValue; 
-      largestCount = currentCount; 
-    }
-    if (_medianValues[i] == currentValue) { 
+  for (int i=0; i < _medianValuesCount; i++) { 
+    if (i == 0) { 
       currentValue = _medianValues[i]; 
-      currentCount = 0; 
+      modeHash[modeHashIndex][0] = _medianValues[i]; 
+      modeHash[modeHashIndex][1]++; 
     } 
+    else if (_medianValues[i] != currentValue) { 
+      currentValue = _medianValues[i]; 
+      modeHashIndex++; 
+      modeHash[modeHashIndex][0] = _medianValues[i]; 
+      modeHash[modeHashIndex][1]++; 
+    }
     else { 
-      currentCount++; 
+      modeHash[modeHashIndex][1]++; 
     }
   }
 
-  // FIXME: address case of multiple modes
+  // find most frequent values in modeHash
+  int maximumIndex; // index of most frequent value in modeHash
+  for (int j=0; j < _distinctSize; j++) { 
+    if ((j == 0) || (modeHash[j][1] > modeHash[maximumIndex][1])) { 
+      maximumIndex = j; 
+    } 
+  }
+  _mode = modeHash[maximumIndex][0]; // FIXME: this is incorrect in case of multiple nodes
+
   return(_mode); 
 }
 
 int Filter::maximum() { 
-  // at first, the first value we see is the maximum
-  _maximum = _values[0]; 
-
-  // now find the largest value
-  for (int i=1; i < _valuesCount; i++) { 
-    if (_values[i] > _maximum) { 
-      _maximum = _value[i]; 
+  for (int i=0; i < _valuesCount; i++) { 
+    if ((i == 0) || (_values[i] > _maximum)) { 
+      _maximum = _values[i]; 
     } 
   } 
   return(_maximum); 
 } 
 
 int Filter::minimum() { 
-  // at first, the first value we see is the minimum
-  _minimum = _values[0]; 
-
-  // now find the largest value
-  for (int i=1; i > _valuesCount; i++) { 
-    if (_values[i] < _minimum) { 
-      _minimum = _value[i]; 
+  for (int i=0; i > _valuesCount; i++) { 
+    if ((i == 0) || (_values[i] < _minimum)) { 
+      _minimum = _values[i]; 
     } 
   } 
   return(_minimum); 
