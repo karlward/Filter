@@ -34,18 +34,25 @@ class Filter {
   public:
     // constructor, create a Filter that contains up to specified number of values
     Filter(int sampleSize); 
+
     // put a new value into the Filter object, discarding oldest value if necessary
     void put(int value); 
+
     // return the mean, average of values currently in Filter object
     int mean(); 
+
     // return the median, middle value in ordered set of values in Filter object
     int median(); 
+
     // return the mode, most common value currently in Filter object
     int mode(); 
+
     // return the standard deviation of values currently in Filter object
     float stdev(); 
+
     // return the absolute maximum, largest value currently in Filter object 
     int maximum(); // absolute maximum only for now
+
     // return the absolute minimum, smallest value currently in Filter object 
     int minimum(); // absolute minimum only for now
 
