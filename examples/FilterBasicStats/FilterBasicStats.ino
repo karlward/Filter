@@ -31,7 +31,7 @@ void loop() {
   int analogValue = analogRead(analogPin);
 
   // put that sensor value into the Filter object
-  filteredData.prepend(analogValue); 
+  filteredData.put(analogValue); 
 
   // calculate mean, median, mode, and standard deviation
   int analogMean = filteredData.mean(); 

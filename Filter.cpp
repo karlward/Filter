@@ -37,7 +37,9 @@ Filter::Filter(int sampleSize) {
   _medianValuesCount = 0; // no values stored yet for median calculation 
 }
 
-void Filter::prepend(int value) {
+void Filter::put(int value) {
+  // FIXME: inefficient, should implement a proper ring buffer
+
   // shift everything over 1 position, discarding last position
   for (int i = (sizeof(_values) / sizeof(int)) - 1; i > 0; i--) { 
     _values[i] = _values[i-1]; 

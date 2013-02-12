@@ -17,6 +17,6 @@ mean   KEYWORD2
 median   KEYWORD2
 minimum   KEYWORD2
 mode   KEYWORD2
-prepend   KEYWORD2
+put   KEYWORD2
 stdev   KEYWORD2
 

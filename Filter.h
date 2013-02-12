@@ -30,28 +30,36 @@
 
 #include "Arduino.h"
 
-const byte FILTER_ANALOG = 1; 
-const byte FILTER_DIGITAL = 2; 
-// what about float v int samples, return types? 
-
 class Filter {
   public:
-    Filter(int sampleSize); // what about type? 
-    void prepend(int value); // not in love with the name "prepend"
+    // constructor, create a Filter that contains up to specified number of values
+    Filter(int sampleSize); 
+    // put a new value into the Filter object, discarding oldest value if necessary
+    void put(int value); 
+    // return the mean, average of values currently in Filter object
     int mean(); 
+    // return the median, middle value in ordered set of values in Filter object
     int median(); 
+    // return the mode, most common value currently in Filter object
     int mode(); 
+    // return the standard deviation of values currently in Filter object
     float stdev(); 
-    int maximum(); // relative and absolute, or just absolute?
-    int minimum(); // relative and absolute, or just absolute?
+    // return the absolute maximum, largest value currently in Filter object 
+    int maximum(); // absolute maximum only for now
+    // return the absolute minimum, smallest value currently in Filter object 
+    int minimum(); // absolute minimum only for now
+
+    // UNIMPLEMENTED methods 
+    // int get(); // return oldest value in Filter
+    // bool available(); // like Serial.available()
     // lowpass(); // Q arg? filter algorithm? return type? 
-    // bandpass(); 
-    // highpass(); 
+    // bandpass(); // Q etc.
+    // highpass(); // Q etc. 
     // totalMean(); // mean of all values ever stored, not just moving average
+                    // could be an argument to mean() as well 
     // signalToNoise(); 
-    // what about chaining filters? probably not essential
+    // char * describe();
   private:
-    //byte _type;
     int _sampleSize;
     int _values[];
     int _valuesCount;
@@ -65,8 +73,8 @@ class Filter {
     void _orderedInsert(int value, int pos);
     int _maximum; 
     int _minimum; 
-    void _distinct(); // return distinct values with no duplicates 
-    int _distinctValues[];
+    void _distinct(); // populate _distinctValues
+    int _distinctValues[]; // set of unique elements present in _values array
 };
 
 #endif
