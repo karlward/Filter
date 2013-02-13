@@ -44,8 +44,10 @@ class Filter {
     // return the median, middle value in ordered set of values in Filter object
     int median(); 
 
-    // return the mode, most common value currently in Filter object
+    // return the mode(s), most common value(s) currently in Filter object
     int mode(); 
+    // return the number of modes detected
+    int modeCount(); 
 
     // return the standard deviation of values currently in Filter object
     float stdev(); 

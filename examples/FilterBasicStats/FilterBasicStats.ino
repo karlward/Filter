@@ -4,9 +4,8 @@
  * Simple example demonstrating the "Filter" Arduino library
  * 
  * This code reads an analog sensor and outputs the current value, as well 
- * as the mean, median, mode, and standard deviation values (based on the 
- * last 100 values).  This data is output as text to the Arduino hardware 
- * serial port.  
+ * as the mean, median, and standard deviation values (based on the last 100 
+ * values).  This data is output as text to the Arduino hardware serial port.  
  *
  * Author: Karl Ward
  * License: this example code is released into the public domain
@@ -33,10 +32,9 @@ void loop() {
   // put that sensor value into the Filter object
   filteredData.put(analogValue); 
 
-  // calculate mean, median, mode, and standard deviation
+  // calculate mean, median, and standard deviation
   int analogMean = filteredData.mean(); 
   int analogMedian = filteredData.median(); 
-  int analogMode = filteredData.mode(); 
   int analogStdev = filteredData.stdev(); 
 
   // output the results to the serial port so you can see them
@@ -46,8 +44,6 @@ void loop() {
   Serial.println(analogMean); 
   Serial.print("  median is "); 
   Serial.println(analogMedian);
-  Serial.print("  mode is "); 
-  Serial.println(analogMode); 
   Serial.print("  standard deviation is "); 
   Serial.println(analogStdev); 
 

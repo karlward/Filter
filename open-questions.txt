@@ -10,4 +10,4 @@ How to implement filter registration/ordering?  Follow IPTables example (insert,
 
 How important is memory usage?  Some algorithms can be optimized for memory footprint or for CPU, but not both.  
 
-
+What about iostreams?  
