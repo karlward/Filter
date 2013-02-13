@@ -23,7 +23,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Version 0.3 */ 
+/* Version 0.4-alpha */ 
 
 #include "Arduino.h"
 #include "Filter.h"
@@ -133,74 +133,6 @@ void Filter::_orderedInsert(int value, int pos) {
     }
   }
 } 
-
-// there will probably be a public distinct() method soon
-void Filter::_distinct() { 
-  median(); // make sure the values are in order
-
-  // naive implementation requiring two passes, avoiding malloc
-  int distinctCount = 0; 
-  int currentValue; 
-
-  for (int i=0; i < _medianValuesCount; i++) { 
-    if ((i == 0) || (_medianValues[i] != currentValue)) { 
-      distinctCount++; 
-      currentValue = _medianValues[i]; 
-    } 
-  } 
-  // create an array of just the right size
-  int _distinctValues[distinctCount]; 
-  // j is an index into _distinctValues
-  int j = 0; 
-  for (int i=0; i < _medianValuesCount; i++) { 
-    if ((i == 0) || (_medianValues[i] != currentValue)) { 
-      currentValue = _medianValues[i]; 
-      _distinctValues[j] = _medianValues[i]; 
-      j++; 
-    }
-  }
-}
-
-int Filter::mode() { 
-  median(); // make sure the values are in order
-  _distinct(); // make sure _distinctValues is populated
-  int _distinctSize = (sizeof(_distinctValues) / sizeof(int)); 
-
-  // store the count for each distinct element in a multidimensional array
-  int modeHash[_distinctSize][2]; 
-  int modeHashIndex = 0; 
-
-  int currentValue;
-
-  // count number of each value in _medianValues array
-  for (int i=0; i < _medianValuesCount; i++) { 
-    if (i == 0) { 
-      currentValue = _medianValues[i]; 
-      modeHash[modeHashIndex][0] = _medianValues[i]; 
-      modeHash[modeHashIndex][1]++; 
-    } 
-    else if (_medianValues[i] != currentValue) { 
-      currentValue = _medianValues[i]; 
-      modeHashIndex++; 
-      modeHash[modeHashIndex][0] = _medianValues[i]; 
-      modeHash[modeHashIndex][1]++; 
-    }
-    else { 
-      modeHash[modeHashIndex][1]++; 
-    }
-  }
-
-  // find most frequent values in modeHash
-  int maximumIndex; // index of most frequent value in modeHash
-  for (int j=0; j < _distinctSize; j++) { 
-    if ((j == 0) || (modeHash[j][1] > modeHash[maximumIndex][1])) { 
-      maximumIndex = j; 
-    } 
-  }
-  _mode = modeHash[maximumIndex][0]; // FIXME: this is incorrect in case of multiple nodes
-
-  return(_mode); 
-}
 
 int Filter::maximum() { 
   for (int i=0; i < _valuesCount; i++) { 

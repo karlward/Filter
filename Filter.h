@@ -23,7 +23,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Version 0.3 */
+/* Version 0.4-alpha */
 
 #ifndef Filter_h
 #define Filter_h 
@@ -44,11 +44,6 @@ class Filter {
     // return the median, middle value in ordered set of values in Filter object
     int median(); 
 
-    // return the mode(s), most common value(s) currently in Filter object
-    int mode(); 
-    // return the number of modes detected
-    int modeCount(); 
-
     // return the standard deviation of values currently in Filter object
     float stdev(); 
 
@@ -58,23 +53,12 @@ class Filter {
     // return the absolute minimum, smallest value currently in Filter object 
     int minimum(); // absolute minimum only for now
 
-    // UNIMPLEMENTED methods 
-    // int get(); // return oldest value in Filter
-    // bool available(); // like Serial.available()
-    // lowpass(); // Q arg? filter algorithm? return type? 
-    // bandpass(); // Q etc.
-    // highpass(); // Q etc. 
-    // totalMean(); // mean of all values ever stored, not just moving average
-                    // could be an argument to mean() as well 
-    // signalToNoise(); 
-    // char * describe();
   private:
     int _sampleSize;
     int _values[];
     int _valuesCount;
     long _mean;
     int _median; // may not need to retain this in object
-    int _mode; // may not need to retain this in object 
     float _stdev; 
     int _medianValues[]; // perhaps an ordered array of indices into _values[] would be better
     int _medianValuesCount;
@@ -82,8 +66,6 @@ class Filter {
     void _orderedInsert(int value, int pos);
     int _maximum; 
     int _minimum; 
-    void _distinct(); // populate _distinctValues
-    int _distinctValues[]; // set of unique elements present in _values array
 };
 
 #endif
