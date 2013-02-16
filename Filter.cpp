@@ -31,27 +31,41 @@
 // Constructor
 Filter::Filter(int sampleSize) {
   _sampleSize = sampleSize; // how many values to use for mean, median, etc. 
-  int _values[_sampleSize]; // create array of specified size
+  int _values[_sampleSize+1]; // create array of specified size, plus 1
+  _valuesFirst = _sampleSize; // index to oldest value, initialize to last index
+  _valuesLast = _sampleSize; // index to newest value, initialize to last index
   _valuesCount = 0; // no values stored yet
-  int _medianValues[_sampleSize]; // create array of specified size
+  int _medianValues[_sampleSize]; // create array of specified size, FIXME: plus 1
   _medianValuesCount = 0; // no values stored yet for median calculation 
 }
 
 void Filter::put(int value) {
-  // FIXME: inefficient, should implement a proper ring buffer
-
-  // shift everything over 1 position, discarding last position
-  for (int i = (sizeof(_values) / sizeof(int)) - 1; i > 0; i--) { 
-    _values[i] = _values[i-1]; 
-  } 
-
-  // set first element of _value array to latest value
-  _values[0] = value;
-
-  // keep track of how many values we have in _values array
-  if (_valuesCount < _sampleSize) { 
+  if ((_valuesFirst == _sampleSize) || (_valuesLast == _sampleSize)) { // no values yet 
+    _values[0] = value; 
+    Serial.println("inserting first");  
+    _valuesFirst = 0; 
+    _valuesLast = 0; 
     _valuesCount++; 
+  } 
+  else if (_valuesCount < _sampleSize) { 
+    Serial.println("inserting value"); 
+    _valuesLast = (_valuesLast + 1) % _sampleSize; 
+    _values[_valuesLast] = value; 
+    _valuesCount++; 
+  } 
+  else { 
+    Serial.println("overwriting a value"); 
+    _values[_valuesFirst] = value; 
+    _valuesFirst = (_valuesFirst + 1) % _sampleSize; 
+    _valuesLast = (_valuesLast + 1) % _sampleSize; 
   }
+  Serial.print("value: "); 
+  Serial.println(value); 
+  Serial.print("_valuesCount: "); 
+  Serial.println(_valuesCount); 
+  Serial.print("_sampleSize: "); 
+  Serial.println(_sampleSize); 
+
 }
 
 int Filter::mean() { 
@@ -69,7 +83,7 @@ int Filter::mean() {
   else { 
     _mean = (_mean / 100) + 1; // round up
   }
-  return(_mean); // FIXME: cast to int? 
+  return((int)_mean); // FIXME: cast to int? 
 }
 
 int Filter::median() { 
@@ -103,7 +117,7 @@ float Filter::stdev() {
   // standard deviation calculation  
   long sum = 0; 
   for (int i=0; i < _valuesCount; i++) { 
-    sum = sum + (_values[i] - _mean)^2; 
+    sum = sum + (_values[i] - (int) _mean)^2; 
   } 
   _stdev = sqrt(sum / (float) _valuesCount); 
   
@@ -151,3 +165,19 @@ int Filter::minimum() {
   } 
   return(_minimum); 
 } 
+
+String Filter::describe() { 
+  String description = String("count: "); 
+  description.concat(_valuesCount); 
+  description.concat('/'); 
+  description.concat(_sampleSize); 
+  description.concat('\n'); 
+
+  description.concat("values: "); 
+  for (int i=0; i < _valuesCount; i++) { 
+    description.concat(_values[i]); 
+    description.concat(' '); 
+  } 
+  description.concat('\n'); 
+  return(description);  
+}

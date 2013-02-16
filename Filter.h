@@ -53,10 +53,14 @@ class Filter {
     // return the absolute minimum, smallest value currently in Filter object 
     int minimum(); // absolute minimum only for now
 
+    // return a string describing the state of the object
+    String describe(); 
   private:
     int _sampleSize;
     int _values[];
     int _valuesCount;
+    int _valuesFirst;
+    int _valuesLast;
     long _mean;
     int _median; // may not need to retain this in object
     float _stdev; 
