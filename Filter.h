@@ -57,14 +57,14 @@ class Filter {
     String describe(); 
   private:
     int _sampleSize;
-    int _values[];
+    int *_values;
     int _valuesCount;
     int _valuesFirst;
     int _valuesLast;
     long _mean;
     int _median; // may not need to retain this in object
     float _stdev; 
-    int _medianValues[]; // perhaps an ordered array of indices into _values[] would be better
+    int *_medianValues; // perhaps an ordered array of indices into _values[] would be better
     int _medianValuesCount;
     void _orderedInsert(int value);
     void _orderedInsert(int value, int pos);

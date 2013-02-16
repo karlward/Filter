@@ -30,42 +30,35 @@
 
 // Constructor
 Filter::Filter(int sampleSize) {
-  _sampleSize = sampleSize; // how many values to use for mean, median, etc. 
-  int _values[_sampleSize+1]; // create array of specified size, plus 1
+  // sample size indicates how many values to store for mean, median, etc. 
+  _sampleSize = sampleSize; 
+  // object will store values in array (well, pointer) of specified size, plus 1
+  _values = (int *) malloc(sizeof(int) * (_sampleSize+1)); 
   _valuesFirst = _sampleSize; // index to oldest value, initialize to last index
   _valuesLast = _sampleSize; // index to newest value, initialize to last index
   _valuesCount = 0; // no values stored yet
-  int _medianValues[_sampleSize]; // create array of specified size, FIXME: plus 1
+  // create second array to store median values in order 
+  _medianValues = (int *) malloc(sizeof(int) * (_sampleSize + 1));
   _medianValuesCount = 0; // no values stored yet for median calculation 
 }
 
 void Filter::put(int value) {
   if ((_valuesFirst == _sampleSize) || (_valuesLast == _sampleSize)) { // no values yet 
     _values[0] = value; 
-    Serial.println("inserting first");  
     _valuesFirst = 0; 
     _valuesLast = 0; 
     _valuesCount++; 
   } 
   else if (_valuesCount < _sampleSize) { 
-    Serial.println("inserting value"); 
     _valuesLast = (_valuesLast + 1) % _sampleSize; 
     _values[_valuesLast] = value; 
     _valuesCount++; 
   } 
   else { 
-    Serial.println("overwriting a value"); 
     _values[_valuesFirst] = value; 
     _valuesFirst = (_valuesFirst + 1) % _sampleSize; 
     _valuesLast = (_valuesLast + 1) % _sampleSize; 
   }
-  Serial.print("value: "); 
-  Serial.println(value); 
-  Serial.print("_valuesCount: "); 
-  Serial.println(_valuesCount); 
-  Serial.print("_sampleSize: "); 
-  Serial.println(_sampleSize); 
-
 }
 
 int Filter::mean() { 
@@ -73,9 +66,9 @@ int Filter::mean() {
   // sum all values
   // NOTE: we're doing floating point math in long rather than float
   for (int i=0; i < _valuesCount; i++) { 
-    sum = sum + (_values[i] * 100); // multiply by 100 to do FP math
+    sum = sum + ((long)_values[i] * 100); // multiply by 100 to do FP math
   }
-  _mean = (long) (sum / _valuesCount); // FIXME: is long cast necessary?
+  _mean = sum / (long)_valuesCount; // FIXME: is long cast necessary?
   // figure out rounding, then divide by 100 to correct floating point
   if (_mean % 100 < 50) { 
     _mean = _mean / 100; // round down
@@ -83,7 +76,7 @@ int Filter::mean() {
   else { 
     _mean = (_mean / 100) + 1; // round up
   }
-  return((int)_mean); // FIXME: cast to int? 
+  return((int)_mean); 
 }
 
 int Filter::median() { 
