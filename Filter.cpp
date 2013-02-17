@@ -110,11 +110,11 @@ float Filter::stdev() {
   // standard deviation calculation  
   long sum = 0; 
   for (int i=0; i < _valuesCount; i++) { 
-    sum = sum + ((long)_values[i] - _mean)^2; 
+    sum += square(_values[i] - _mean); 
   } 
   _stdev = sqrt(sum / (float) _valuesCount); 
   
-  return((float) _stdev); 
+  return(_stdev); 
 } 
 
 // NOTE: overloaded method
