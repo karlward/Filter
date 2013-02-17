@@ -12,9 +12,9 @@ Filter	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
+describe   KEYWORD2
 maximum   KEYWORD2
 mean   KEYWORD2
-median   KEYWORD2
 minimum   KEYWORD2
 put   KEYWORD2
 stdev   KEYWORD2

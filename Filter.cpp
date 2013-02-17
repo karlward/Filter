@@ -2,8 +2,7 @@
  * Filter - Arduino data filtering library
  * 
  * The Filter library provides Arduino programmers with data filtering 
- * operations via basic statistic methods (e.g. mean, median, standard 
- * deviation) for a configurable number of recent values. 
+ * operations on a configurable number of recent values.
  * 
  * Copyright 2012-2013 Karl Ward
  * See the file CREDITS for details on external code referenced/incorporated
@@ -23,7 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Version 0.4-alpha */ 
+/* Version 0.4 */ 
 
 #include "Arduino.h"
 #include "Filter.h"
@@ -37,9 +36,6 @@ Filter::Filter(int sampleSize) {
   _valuesFirst = _sampleSize; // index to oldest value, initialize to last index
   _valuesLast = _sampleSize; // index to newest value, initialize to last index
   _valuesCount = 0; // no values stored yet
-  // create second array to store median values in order 
-  _medianValues = (int *) malloc(sizeof(int) * (_sampleSize + 1));
-  _medianValuesCount = 0; // no values stored yet for median calculation 
 }
 
 void Filter::put(int value) {
@@ -49,12 +45,12 @@ void Filter::put(int value) {
     _valuesLast = 0; 
     _valuesCount++; 
   } 
-  else if (_valuesCount < _sampleSize) { 
+  else if (_valuesCount < _sampleSize) { // not full of values yet
     _valuesLast = (_valuesLast + 1) % _sampleSize; 
     _values[_valuesLast] = value; 
     _valuesCount++; 
   } 
-  else { 
+  else { // overwriting old values now
     _values[_valuesFirst] = value; 
     _valuesFirst = (_valuesFirst + 1) % _sampleSize; 
     _valuesLast = (_valuesLast + 1) % _sampleSize; 
@@ -64,7 +60,7 @@ void Filter::put(int value) {
 int Filter::mean() { 
   long sum = 0;
   // sum all values
-  // NOTE: we're doing floating point math in long rather than float
+  // NOTE: we're doing floating point math in long rather than using floats
   for (int i=0; i < _valuesCount; i++) { 
     sum = sum + ((long)_values[i] * 100); // multiply by 100 to do FP math
   }
@@ -79,30 +75,6 @@ int Filter::mean() {
   return((int)_mean); 
 }
 
-int Filter::median() { 
-  // erase old readings, we only want the freshness
-  _medianValuesCount = 0; // reset the counter
-  // NOTE: There is no simple way to delete values within an array in C++,
-  //   without using a vector or a pointer. This means _median_values 
-  //   can contain old/garbage data, so do not access it directly.
-
-  // create an ordered array of the latest values 
-  for (int i=0; i < _valuesCount; i++) { 
-    _orderedInsert(_values[i]); // insert into _median_values array
-  } 
-  
-  // median is the element in the middle of the ordered list of values
-  // FIXME: should we use _medianValuesCount instead of _valuesCount ?
-  int midpoint = (int) _valuesCount / 2; 
-  if (_valuesCount % 2 == 1) { // we have an odd number of values
-    _median = _medianValues[midpoint]; 
-  } 
-  else { // we have an odd number of values, so get mean of midpoint pair
-    _median = (_medianValues[midpoint] + _medianValues[midpoint+1]) / 2; 
-  }
-  return(_median); 
-}
-
 float Filter::stdev() { 
   // make sure we have the most recent mean calculated
   mean();
@@ -115,30 +87,6 @@ float Filter::stdev() {
   _stdev = sqrt(sum / (float) _valuesCount); 
   
   return(_stdev); 
-} 
-
-// NOTE: overloaded method
-void Filter::_orderedInsert(int value) { 
-  _orderedInsert(value, 0); // call overloaded method with position arg
-}
- 
-// NOTE: overloaded method, and recursive too
-void Filter::_orderedInsert(int value, int pos) { 
-  for (int i=pos; i < _valuesCount; i++) { 
-    if (_medianValuesCount < _valuesCount) { 
-      if (i == _medianValuesCount) { 
-        _medianValues[i] = value; 
-        _medianValuesCount++; 
-      }
-      else if (value < _medianValues[i]) {
-        _orderedInsert(_medianValues[i], i+1); 
-        _medianValues[i] = value;   
-      } 
-      else if (value >= _medianValues[i]) { 
-        _orderedInsert(value, i+1); 
-      }
-    }
-  }
 } 
 
 int Filter::maximum() { 
@@ -160,9 +108,9 @@ int Filter::minimum() {
 } 
 
 String Filter::describe() { 
-  String description = String("count: "); 
+  String description = String("stored values count: "); 
   description.concat(_valuesCount); 
-  description.concat('/'); 
+  description.concat(' of '); 
   description.concat(_sampleSize); 
   description.concat('\n'); 
 
