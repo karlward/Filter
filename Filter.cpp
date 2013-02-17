@@ -110,11 +110,11 @@ float Filter::stdev() {
   // standard deviation calculation  
   long sum = 0; 
   for (int i=0; i < _valuesCount; i++) { 
-    sum = sum + (_values[i] - (int) _mean)^2; 
+    sum = sum + ((long)_values[i] - _mean)^2; 
   } 
   _stdev = sqrt(sum / (float) _valuesCount); 
   
-  return(_stdev); 
+  return((float) _stdev); 
 } 
 
 // NOTE: overloaded method
@@ -151,7 +151,7 @@ int Filter::maximum() {
 } 
 
 int Filter::minimum() { 
-  for (int i=0; i > _valuesCount; i++) { 
+  for (int i=0; i < _valuesCount; i++) { 
     if ((i == 0) || (_values[i] < _minimum)) { 
       _minimum = _values[i]; 
     } 
