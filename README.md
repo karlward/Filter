@@ -9,3 +9,5 @@ operations on a configurable number of recent values.
 - See the file CREDITS for info on authors and sources.
 - See the file file COPYING for info on software licensing.
 - Code available at https://github.com/karlward/Filter
+- Installation of Arduino libraries (like this one) is described at 
+  http://arduino.cc/en/Guide/Libraries
