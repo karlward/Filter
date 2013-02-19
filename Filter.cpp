@@ -82,7 +82,7 @@ float Filter::stdev() {
   // standard deviation calculation  
   long sum = 0; 
   for (int i=0; i < _valuesCount; i++) { 
-    sum += square(_values[i] - _mean); 
+    sum += sq(_values[i] - _mean); 
   } 
   _stdev = sqrt(sum / (float) _valuesCount); 
   
