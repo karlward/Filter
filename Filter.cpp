@@ -82,9 +82,11 @@ float Filter::stdev() {
   // standard deviation calculation  
   long sum = 0; 
   for (int i=0; i < _valuesCount; i++) { 
-    sum += sq(_values[i] - _mean); 
+    long diff = _values[i] - _mean; 
+    sum += sq(diff); 
   } 
-  _stdev = sqrt(sum / (float) _valuesCount); 
+  float diffmean = sum / (float) _valuesCount;
+  _stdev = sqrt(diffmean); 
   
   return(_stdev); 
 } 
@@ -110,15 +112,15 @@ int Filter::minimum() {
 String Filter::describe() { 
   String description = String("stored values count: "); 
   description.concat(_valuesCount); 
-  description.concat(' of '); 
+  description.concat(" of "); 
   description.concat(_sampleSize); 
-  description.concat('\n'); 
+  description.concat("\n"); 
 
   description.concat("values: "); 
   for (int i=0; i < _valuesCount; i++) { 
     description.concat(_values[i]); 
     description.concat(' '); 
   } 
-  description.concat('\n'); 
+  description.concat("\n"); 
   return(description);  
 }

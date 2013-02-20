@@ -1,6 +1,6 @@
 /** 
- * TenNumberTest: simple test code that generates random numbers, stores 
- *   up to 10 of them in a Filter object, and does some basic statistic 
+ * HundredNumberTest: simple test code that generates random numbers, stores 
+ *   up to 100 of them in a Filter object, and does some basic statistic 
  *   operations on them.  This sketch requires no sensors, but you do need 
  *   to run it on an Arduino board. 
  *
@@ -11,8 +11,8 @@
 
 #include "Filter.h"
 
-// we're going to store 10 values for analysis
-Filter filteredData(10); 
+// we're going to store 100 values for analysis
+Filter filteredData(100); 
 
 void setup() { 
   // open serial port to see debugging output
