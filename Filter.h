@@ -32,36 +32,36 @@
 class Filter {
   public:
     // constructor, create a Filter that contains up to specified number of values
-    Filter(int sampleSize); 
+    Filter(long sampleSize); 
 
     // put a new value into the Filter object, discarding oldest value if necessary
-    void put(int value); 
+    void put(long value); 
 
     // return a string describing the state of the object
     String describe(); 
 
     // return the absolute maximum, largest value currently in Filter object 
-    int maximum(); // absolute maximum only for now
+    long maximum(); // absolute maximum only for now
 
     // return the mean, average of values currently in Filter object
-    int mean(); 
+    long mean(); 
 
     // return the absolute minimum, smallest value currently in Filter object 
-    int minimum(); // absolute minimum only for now
+    long minimum(); // absolute minimum only for now
 
     // return the standard deviation of values currently in Filter object
     float stdev(); 
 
   private:
-    int _maximum; 
+    long _maximum; 
     long _mean;
-    int _minimum; 
-    int _sampleSize;
+    long _minimum; 
+    long _sampleSize;
     float _stdev; 
-    int *_values;
-    int _valuesCount;
-    int _valuesFirst;
-    int _valuesLast;
+    long *_values;
+    long _valuesCount;
+    long _valuesFirst;
+    long _valuesLast;
 };
 
 #endif

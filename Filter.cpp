@@ -28,17 +28,17 @@
 #include "Filter.h"
 
 // Constructor
-Filter::Filter(int sampleSize) {
+Filter::Filter(long sampleSize) {
   // sample size indicates how many values to store for mean, median, etc. 
   _sampleSize = sampleSize; 
   // object will store values in array (well, pointer) of specified size, plus 1
-  _values = (int *) malloc(sizeof(int) * (_sampleSize+1)); 
+  _values = (long *) malloc(sizeof(long) * (_sampleSize+1)); 
   _valuesFirst = _sampleSize; // index to oldest value, initialize to last index
   _valuesLast = _sampleSize; // index to newest value, initialize to last index
   _valuesCount = 0; // no values stored yet
 }
 
-void Filter::put(int value) {
+void Filter::put(long value) {
   if ((_valuesFirst == _sampleSize) || (_valuesLast == _sampleSize)) { // no values yet 
     _values[0] = value; 
     _valuesFirst = 0; 
@@ -57,14 +57,14 @@ void Filter::put(int value) {
   }
 }
 
-int Filter::mean() { 
+long Filter::mean() { 
   long sum = 0;
   // sum all values
   // NOTE: we're doing floating point math in long rather than using floats
-  for (int i=0; i < _valuesCount; i++) { 
-    sum = sum + ((long)_values[i] * 100); // multiply by 100 to do FP math
+  for (long i=0; i < _valuesCount; i++) { 
+    sum = sum + (_values[i] * 100); // multiply by 100 to do FP math
   }
-  _mean = sum / (long)_valuesCount; // FIXME: is long cast necessary?
+  _mean = sum / _valuesCount; // FIXME: is long cast necessary?
   // figure out rounding, then divide by 100 to correct floating point
   if (_mean % 100 < 50) { 
     _mean = _mean / 100; // round down
@@ -72,7 +72,7 @@ int Filter::mean() {
   else { 
     _mean = (_mean / 100) + 1; // round up
   }
-  return((int)_mean); 
+  return(mean); 
 }
 
 float Filter::stdev() { 
@@ -81,18 +81,16 @@ float Filter::stdev() {
 
   // standard deviation calculation  
   long sum = 0; 
-  for (int i=0; i < _valuesCount; i++) { 
-    long diff = _values[i] - _mean; 
-    sum += sq(diff); 
+  for (long i=0; i < _valuesCount; i++) { 
+    sum += sq(_values[i] - _mean); 
   } 
-  float diffmean = sum / (float) _valuesCount;
-  _stdev = sqrt(diffmean); 
+  _stdev = sqrt(sum / (float) _valuesCount); 
   
   return(_stdev); 
 } 
 
-int Filter::maximum() { 
-  for (int i=0; i < _valuesCount; i++) { 
+long Filter::maximum() { 
+  for (long i=0; i < _valuesCount; i++) { 
     if ((i == 0) || (_values[i] > _maximum)) { 
       _maximum = _values[i]; 
     } 
@@ -100,8 +98,8 @@ int Filter::maximum() {
   return(_maximum); 
 } 
 
-int Filter::minimum() { 
-  for (int i=0; i < _valuesCount; i++) { 
+long Filter::minimum() { 
+  for (long i=0; i < _valuesCount; i++) { 
     if ((i == 0) || (_values[i] < _minimum)) { 
       _minimum = _values[i]; 
     } 
@@ -117,7 +115,7 @@ String Filter::describe() {
   description.concat("\n"); 
 
   description.concat("values: "); 
-  for (int i=0; i < _valuesCount; i++) { 
+  for (long i=0; i < _valuesCount; i++) { 
     description.concat(_values[i]); 
     description.concat(' '); 
   } 
