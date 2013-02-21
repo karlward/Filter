@@ -72,7 +72,7 @@ long Filter::mean() {
   else { 
     _mean = (_mean / 100) + 1; // round up
   }
-  return(mean); 
+  return(_mean); 
 }
 
 float Filter::stdev() { 
