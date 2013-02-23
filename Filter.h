@@ -22,7 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Version 0.4.1 */
+/* Version 0.4.2 */
 
 #ifndef Filter_h
 #define Filter_h 
