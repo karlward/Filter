@@ -38,7 +38,7 @@ void loop() {
   int analogStdev = filteredData.stdev(); 
 
   // output the results to the serial port so you can see them
-  Serial.println(analogValue); 
+  Serial.print(analogValue); 
   Serial.print(","); 
   Serial.print(analogMean); 
   Serial.print(","); 
