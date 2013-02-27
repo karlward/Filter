@@ -22,7 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Version 0.4.2 */ 
+/* Version 0.4.3 */ 
 
 #include "Arduino.h"
 #include "Filter.h"
