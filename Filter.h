@@ -22,7 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Version 0.4.3 */
+/* Version 0.5.0 */
 
 #ifndef Filter_h
 #define Filter_h 
@@ -46,6 +46,9 @@ class Filter {
     // return the mean, average of values currently in Filter object
     long mean(); 
 
+    // return the median, most commonly appearing value in Filter object
+    long median(); 
+
     // return the absolute minimum, smallest value currently in Filter object 
     long minimum(); // absolute minimum only for now
 
@@ -55,6 +58,9 @@ class Filter {
   private:
     long _maximum; 
     long _mean;
+    long _median;
+    long *_medianValues;
+    long _medianValuesCount;
     long _minimum; 
     long _sampleSize;
     float _stdev; 
@@ -62,6 +68,8 @@ class Filter {
     long _valuesCount;
     long _valuesFirst;
     long _valuesLast;
+
+    void _orderedInsert(long value, long pos);
 };
 
 #endif
