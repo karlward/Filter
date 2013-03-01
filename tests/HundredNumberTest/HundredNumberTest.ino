@@ -27,6 +27,7 @@ void loop() {
 
   // calculate mean, standard deviation, etc.
   int mean = filteredData.mean(); 
+  int median = filteredData.median(); 
   int minimum = filteredData.minimum(); 
   int maximum = filteredData.maximum(); 
   float stdev = filteredData.stdev(); 
@@ -34,6 +35,8 @@ void loop() {
   // output the results to the serial port so you can see them
   Serial.print("  mean is "); 
   Serial.println(mean); 
+  Serial.print("  median is "); 
+  Serial.println(median); 
   Serial.print("  minimum is "); 
   Serial.println(minimum); 
   Serial.print("  maximum is "); 

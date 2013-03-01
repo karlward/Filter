@@ -65,7 +65,7 @@ long Filter::mean() {
   for (long i=0; i < _valuesCount; i++) { 
     sum = sum + (_values[i] * 100); // multiply by 100 to do FP math
   }
-  _mean = sum / _valuesCount; // FIXME: is long cast necessary?
+  _mean = sum / _valuesCount;
   // figure out rounding, then divide by 100 to correct floating point
   if (_mean % 100 < 50) { 
     _mean = _mean / 100; // round down
@@ -96,61 +96,36 @@ long Filter::median() {
     midpoint = (_valuesCount - 1) / 2; 
   }
   if (_valuesCount % 2 == 1) { // we have an odd number of values
-    Serial.print("midpoint "); 
-    Serial.print(midpoint); 
-    Serial.print(", value "); 
-    Serial.print(_medianValues[midpoint]); 
-    Serial.print(", _valuesCount "); 
-    Serial.println(_valuesCount); 
     _median = _medianValues[midpoint]; 
   } 
   else { // we have an even number of values, so get mean of midpoint pair
-    Serial.print("midpoint "); 
-    Serial.print(midpoint); 
-    Serial.print(", value "); 
-    Serial.print(_medianValues[midpoint]); 
-    Serial.print(", value+1 "); 
-    Serial.print(_medianValues[midpoint+1]); 
-    Serial.print(", _valuesCount "); 
-    Serial.println(_valuesCount); 
-    _median = (_medianValues[midpoint] + _medianValues[midpoint+1]) / 2; // FIXME: rounding!
+    // NOTE: we're doing floating point math in long rather than using floats
+    _median = ((_medianValues[midpoint] + _medianValues[midpoint+1]) * 100) / 2;
+    if (_median % 100 < 50) { 
+      _median = _median / 100; // round down 
+    }
+    else { 
+      _median = (_median / 100) + 1; // round up
+    } 
   }
   return(_median); 
 }
 
 // NOTE: recursive
 void Filter::_orderedInsert(long value, long pos) { 
-  Serial.print("value "); 
-  Serial.print(value); 
-  Serial.print(" pos "); 
-  Serial.println(pos); 
-//  for (long i=pos; i < _valuesCount; i++) { // remove for loop 
-    if (_medianValuesCount < _valuesCount) { 
-//      if (i == _medianValuesCount) {  // i to pos
-      if (pos == _medianValuesCount) { 
-        Serial.println(" inserting value at end of _medianValues"); 
-//        _medianValues[i] = value; // i to pos
-        _medianValues[pos] = value; 
-        _medianValuesCount++; 
-//        return; // remove for loop
-      }
-//      else if (value < _medianValues[i]) { // i to pos
-      else if (value < _medianValues[pos]) {
-        Serial.println(" less than"); 
-//        _orderedInsert(_medianValues[i], i+1); // i to pos
-        _orderedInsert(_medianValues[pos], pos+1); 
-//        _medianValues[i] = value;   // i to pos
-        _medianValues[pos] = value;   
-      } 
-//      else if (value >= _medianValues[i]) { // i to pos
-      else if (value >= _medianValues[pos]) { 
-        Serial.println(" greater than or equal to"); 
-//        _orderedInsert(value, i+1); // i to pos
-        _orderedInsert(value, pos+1); 
-//        return;//remove for loop
-      }
+  if (_medianValuesCount < _valuesCount) { 
+    if (pos == _medianValuesCount) { 
+      _medianValues[pos] = value; 
+      _medianValuesCount++; 
     }
-//  } // remove for loop
+    else if (value < _medianValues[pos]) {
+      _orderedInsert(_medianValues[pos], pos+1); 
+      _medianValues[pos] = value;   
+    } 
+    else if (value >= _medianValues[pos]) { 
+      _orderedInsert(value, pos+1); 
+    }
+  }
 } 
 
 // FIXME: long return value instead of float?  long math instead of float math? 
