@@ -113,6 +113,10 @@ long Filter::median() {
 
 // NOTE: recursive
 void Filter::_orderedInsert(long value, long pos) { 
+//  Serial.print("calling _orderedInsert, value "); 
+//  Serial.print(value); 
+//  Serial.print(" pos "); 
+//  Serial.println(pos); 
   if (_medianValuesCount < _valuesCount) { 
     if (pos == _medianValuesCount) { 
       _medianValues[pos] = value; 
