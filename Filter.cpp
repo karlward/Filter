@@ -63,11 +63,10 @@ long Filter::mean() {
   // sum all values
   // NOTE: we're doing floating point math in long rather than using floats
   for (long i=0; i < _valuesCount; i++) { 
-    sum = sum + (_values[i] * 100); // multiply by 100 to do FP math
+    sum = sum + (_values[i] * 10); // multiply by 10 to do FP math
   }
   _mean = sum / _valuesCount;
-  // figure out rounding, then divide by 100 to correct floating point
-  _mean = _longRound(_mean, 100); 
+  _mean = _longRound(_mean, 10); 
   return(_mean); 
 }
 
@@ -95,8 +94,8 @@ long Filter::median() {
   } 
   else { // we have an even number of values, so get mean of midpoint pair
     // NOTE: we're doing floating point math in long rather than using floats
-    _median = ((_medianValues[midpoint] + _medianValues[midpoint+1]) * 100) / 2;
-    _median = _longRound(_median, 100); 
+    _median = ((_medianValues[midpoint] + _medianValues[midpoint+1]) * 10) / 2;
+    _median = _longRound(_median, 10); 
   }
   return(_median); 
 }
@@ -122,8 +121,8 @@ void Filter::_orderedInsert(long value, long pos) {
 // TODO: implement different SNR algorithms
 long Filter::signalToNoise() { 
   mean(); 
-  long snr = (_mean * 100) / stdev(); // FIXME: redundant call to mean() 
-  snr = _longRound(snr, 100);   
+  long snr = (_mean * 10) / stdev(); // FIXME: redundant call to mean() 
+  snr = _longRound(snr, 10);   
   return(snr); 
 }
 
@@ -134,7 +133,7 @@ long Filter::stdev() {
   // standard deviation calculation  
   long sum = 0; 
   for (long i=0; i < _valuesCount; i++) { 
-    sum += sq(_values[i] - _mean) * 100; // works out to a multiplier of 10
+    sum += sq(_values[i] - _mean) * 100; // works out to a multiplier of 10 (100 is 10 squared)
   } 
   // NOTE: we're doing floating point math in long rather than using floats
   Serial.print("sum / _valuesCount: "); 
