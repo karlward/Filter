@@ -5,7 +5,7 @@
  * operations on a configurable number of recent values. 
  * 
  * Copyright 2012-2013 Karl Ward
- * See the file CREDITS for details on external code referenced/incorporated
+ * See the file CREDITS for contributors and external code referenced/incorporated
  * See the file COPYING for details on software licensing
  *
  * This program is free software: you can redistribute it and/or modify
@@ -56,6 +56,7 @@ class Filter {
     float stdev(); 
 
   private:
+    // data
     long _maximum; 
     long _mean;
     long _median;
@@ -69,6 +70,8 @@ class Filter {
     long _valuesFirst;
     long _valuesLast;
 
+    // methods
+    long _longRound(long input); 
     void _orderedInsert(long value, long pos);
 };
 

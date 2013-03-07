@@ -5,7 +5,7 @@
  * operations on a configurable number of recent values.
  * 
  * Copyright 2012-2013 Karl Ward
- * See the file CREDITS for details on external code referenced/incorporated
+ * See the file CREDITS for contributors and external code referenced/incorporated
  * See the file COPYING for details on software licensing
  *
  * This program is free software: you can redistribute it and/or modify
@@ -67,12 +67,7 @@ long Filter::mean() {
   }
   _mean = sum / _valuesCount;
   // figure out rounding, then divide by 100 to correct floating point
-  if (_mean % 100 < 50) { 
-    _mean = _mean / 100; // round down
-  } 
-  else { 
-    _mean = (_mean / 100) + 1; // round up
-  }
+  _mean = _longRound(_mean); 
   return(_mean); 
 }
 
@@ -101,22 +96,13 @@ long Filter::median() {
   else { // we have an even number of values, so get mean of midpoint pair
     // NOTE: we're doing floating point math in long rather than using floats
     _median = ((_medianValues[midpoint] + _medianValues[midpoint+1]) * 100) / 2;
-    if (_median % 100 < 50) { 
-      _median = _median / 100; // round down 
-    }
-    else { 
-      _median = (_median / 100) + 1; // round up
-    } 
+    _median = _longRound(_median); 
   }
   return(_median); 
 }
 
 // NOTE: recursive
 void Filter::_orderedInsert(long value, long pos) { 
-//  Serial.print("calling _orderedInsert, value "); 
-//  Serial.print(value); 
-//  Serial.print(" pos "); 
-//  Serial.println(pos); 
   if (_medianValuesCount < _valuesCount) { 
     if (pos == _medianValuesCount) { 
       _medianValues[pos] = value; 
@@ -132,8 +118,7 @@ void Filter::_orderedInsert(long value, long pos) {
   }
 } 
 
-// FIXME: long return value instead of float?  long math instead of float math? 
-float Filter::stdev() { 
+long Filter::stdev() { 
   // make sure we have the most recent mean calculated
   mean();
 
@@ -142,9 +127,21 @@ float Filter::stdev() {
   for (long i=0; i < _valuesCount; i++) { 
     sum += sq(_values[i] - _mean); 
   } 
-  _stdev = sqrt(sum / (float) _valuesCount); 
-  
+  // NOTE: we're doing floating point math in long rather than using floats
+  _stdev = sqrt((sum * 100) / _valuesCount); 
+  _stdev = _longRound(_stdev); 
+
   return(_stdev); 
+} 
+
+long Filter::_longRound(long input) { 
+  if (input % 100 < 50) { 
+    input = input / 100; // round down 
+  }
+  else { 
+    input = (input / 100) + 1; // round up
+  } 
+  return(input); 
 } 
 
 long Filter::maximum() { 

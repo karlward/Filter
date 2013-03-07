@@ -30,7 +30,7 @@ void loop() {
   int median = filteredData.median(); 
   int minimum = filteredData.minimum(); 
   int maximum = filteredData.maximum(); 
-  float stdev = filteredData.stdev(); 
+  int stdev = filteredData.stdev(); 
 
   // output the results to the serial port so you can see them
   Serial.print("  mean is "); 
