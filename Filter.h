@@ -74,7 +74,7 @@ class Filter {
     long _valuesLast;
 
     // methods
-    long _longRound(long input); 
+    long _longRound(long input, long multiplier); 
     void _orderedInsert(long value, long pos);
 };
 

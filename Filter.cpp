@@ -67,7 +67,7 @@ long Filter::mean() {
   }
   _mean = sum / _valuesCount;
   // figure out rounding, then divide by 100 to correct floating point
-  _mean = _longRound(_mean); 
+  _mean = _longRound(_mean, 100); 
   return(_mean); 
 }
 
@@ -96,7 +96,7 @@ long Filter::median() {
   else { // we have an even number of values, so get mean of midpoint pair
     // NOTE: we're doing floating point math in long rather than using floats
     _median = ((_medianValues[midpoint] + _medianValues[midpoint+1]) * 100) / 2;
-    _median = _longRound(_median); 
+    _median = _longRound(_median, 100); 
   }
   return(_median); 
 }
@@ -118,10 +118,12 @@ void Filter::_orderedInsert(long value, long pos) {
   }
 } 
 
+// signal to noise ratio, defined as mean divided by standard deviation
+// TODO: implement different SNR algorithms
 long Filter::signalToNoise() { 
   mean(); 
   long snr = (_mean * 100) / stdev(); // FIXME: redundant call to mean() 
-  snr = _longRound(snr);   
+  snr = _longRound(snr, 100);   
   return(snr); 
 }
 
@@ -132,21 +134,25 @@ long Filter::stdev() {
   // standard deviation calculation  
   long sum = 0; 
   for (long i=0; i < _valuesCount; i++) { 
-    sum += sq(_values[i] - _mean); 
+    sum += sq(_values[i] - _mean) * 100; // works out to a multiplier of 10
   } 
   // NOTE: we're doing floating point math in long rather than using floats
-  _stdev = sqrt((sum * 100) / _valuesCount); 
-  _stdev = _longRound(_stdev); 
+  Serial.print("sum / _valuesCount: "); 
+  Serial.print(sum); 
+  Serial.print(" "); 
+  Serial.println(_valuesCount); 
+  _stdev = sqrt(sum / _valuesCount); 
+  _stdev = _longRound(_stdev, 10); // undo that multiplier of 10
 
   return(_stdev); 
 } 
 
-long Filter::_longRound(long input) { 
-  if (input % 100 < 50) { 
-    input = input / 100; // round down 
+long Filter::_longRound(long input, long multiplier) { 
+  if (input % multiplier < (multiplier/2)) { 
+    input = input / multiplier; // round down 
   }
   else { 
-    input = (input / 100) + 1; // round up
+    input = (input / multiplier) + 1; // round up
   } 
   return(input); 
 } 
