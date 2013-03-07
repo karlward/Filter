@@ -52,8 +52,11 @@ class Filter {
     // return the absolute minimum, smallest value currently in Filter object 
     long minimum(); // absolute minimum only for now
 
+    // signal to noise ratio, ratio of mean to standard deviation
+    long signalToNoise(); 
+
     // return the standard deviation of values currently in Filter object
-    float stdev(); 
+    long stdev(); 
 
   private:
     // data

@@ -118,6 +118,13 @@ void Filter::_orderedInsert(long value, long pos) {
   }
 } 
 
+long Filter::signalToNoise() { 
+  mean(); 
+  long snr = (_mean * 100) / stdev(); // FIXME: redundant call to mean() 
+  snr = _longRound(snr);   
+  return(snr); 
+}
+
 long Filter::stdev() { 
   // make sure we have the most recent mean calculated
   mean();
