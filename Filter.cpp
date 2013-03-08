@@ -82,6 +82,7 @@ long Filter::median() {
   // create an ordered array of the latest values 
   for (long i=0; i < _valuesCount; i++) { 
     _orderedInsert(_values[i], 0); // insert into _median_values array
+    // _orderedInsert2(_values[1]); 
   } 
   
   // median is the element in the middle of the ordered list of values
@@ -100,7 +101,33 @@ long Filter::median() {
   return(_median); 
 }
 
-// NOTE: recursive
+void Filter::_moveOver(long start, long end) { 
+  for (long i = end; i > start; i--) { 
+    _medianValues[i] = _medianValues[i-1]; 
+  }
+} 
+
+// non-recursive version, CPU intensive
+void Filter::_orderedInsert2(long value) { 
+  //if (_medianValuesCount < _valuesCount) { 
+  for (long j = 0; j <= _medianValuesCount; j++) { 
+    if (j == _medianValuesCount) { // FIXME: code in progress
+      _medianValues[j] = value; 
+      _medianValuesCount++; 
+    }
+    else if (value < _medianValues[j]) {
+      //_orderedInsert(_medianValues[pos], pos+1); 
+      _moveOver(j, _medianValuesCount); 
+      _medianValues[j] = value;   
+      _medianValuesCount++; 
+    } 
+    else if (value >= _medianValues[j]) { 
+      //_orderedInsert(value, pos+1); 
+    }
+  }
+} 
+
+// NOTE: recursive, memory intensive
 void Filter::_orderedInsert(long value, long pos) { 
   if (_medianValuesCount < _valuesCount) { 
     if (pos == _medianValuesCount) { 
@@ -120,8 +147,9 @@ void Filter::_orderedInsert(long value, long pos) {
 // signal to noise ratio, defined as mean divided by standard deviation
 // TODO: implement different SNR algorithms
 long Filter::signalToNoise() { 
-  mean(); 
-  long snr = (_mean * 10) / stdev(); // FIXME: redundant call to mean() 
+  long sd = stdev(); // NOTE: signalToNoise() relies on stdev() calling mean() 
+                     //   to update _mean, this avoids calling mean() twice
+  long snr = (_mean * 10) / sd; 
   snr = _longRound(snr, 10);   
   return(snr); 
 }
@@ -133,15 +161,10 @@ long Filter::stdev() {
   // standard deviation calculation  
   long sum = 0; 
   for (long i=0; i < _valuesCount; i++) { 
-    sum += sq(_values[i] - _mean) * 100; // works out to a multiplier of 10 (100 is 10 squared)
+    sum += sq(_values[i] - _mean) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
   } 
-  // NOTE: we're doing floating point math in long rather than using floats
-  Serial.print("sum / _valuesCount: "); 
-  Serial.print(sum); 
-  Serial.print(" "); 
-  Serial.println(_valuesCount); 
-  _stdev = sqrt(sum / _valuesCount); 
-  _stdev = _longRound(_stdev, 10); // undo that multiplier of 10
+  _stdev = sqrt(sum / _valuesCount);
+  _stdev = _longRound(_stdev, 10); // round and undo that multiplier of 10
 
   return(_stdev); 
 } 
