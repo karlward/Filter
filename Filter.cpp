@@ -166,7 +166,7 @@ long Filter::signalToNoise() { // FIXME: rename to signalPercentage ?
     //snr = _longRound(snr, 10); // FIXME: this should not be 1000, should prob. be 10
     // TODO: test math here 
     sp = sd * 1000 / _mean; // using long rather than float 
-    sp = _longRound(sp, 1000) * 100; // multiply by 100 to get percentage
+    sp = _longRound(sp, 10); // removing only 1 decimal place here, on purpose
   } 
   return(sp); 
 }

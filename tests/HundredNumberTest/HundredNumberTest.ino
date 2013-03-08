@@ -31,6 +31,7 @@ void loop() {
   int minimum = filteredData.minimum(); 
   int maximum = filteredData.maximum(); 
   int stdev = filteredData.stdev(); 
+  int signalPercentage = filteredData.signalToNoise(); 
 
   // output the results to the serial port so you can see them
   Serial.print("  mean is "); 
@@ -43,6 +44,8 @@ void loop() {
   Serial.println(maximum); 
   Serial.print("  standard deviation is "); 
   Serial.println(stdev); 
+  Serial.print("  signal percentage is "); 
+  Serial.println(signalPercentage); 
 
   delay(1000); // short delay so we don't flood the serial monitor
 }
