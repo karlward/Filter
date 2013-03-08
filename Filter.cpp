@@ -81,8 +81,8 @@ long Filter::median() {
   _medianValues = (long *) malloc(sizeof(long) * (_sampleSize));
   // create an ordered array of the latest values 
   for (long i=0; i < _valuesCount; i++) { 
-    _orderedInsert(_values[i], 0); // insert into _median_values array
-    // _orderedInsert2(_values[1]); 
+    //_orderedInsert(_values[i], 0); // insert into _medianValues array
+    _orderedInsert2(_values[i]); 
   } 
   
   // median is the element in the middle of the ordered list of values
@@ -109,21 +109,27 @@ void Filter::_moveOver(long start, long end) {
 
 // non-recursive version, CPU intensive
 void Filter::_orderedInsert2(long value) { 
-  //if (_medianValuesCount < _valuesCount) { 
   for (long j = 0; j <= _medianValuesCount; j++) { 
-    if (j == _medianValuesCount) { // FIXME: code in progress
+    if (j == _medianValuesCount) { 
       _medianValues[j] = value; 
       _medianValuesCount++; 
+      //Serial.print("inserting value "); 
+      //Serial.print(_medianValues[j]); 
+      //Serial.print(" at pos "); 
+      //Serial.println(j); 
+      return; // break out of the loop 
     }
     else if (value < _medianValues[j]) {
       //_orderedInsert(_medianValues[pos], pos+1); 
       _moveOver(j, _medianValuesCount); 
-      _medianValues[j] = value;   
+      _medianValues[j] = value; 
       _medianValuesCount++; 
+      //Serial.print("inserting value "); 
+      //Serial.print(_medianValues[j]); 
+      //Serial.print(" at pos "); 
+      //Serial.println(j); 
+      return; // break out of the loop  
     } 
-    else if (value >= _medianValues[j]) { 
-      //_orderedInsert(value, pos+1); 
-    }
   }
 } 
 
@@ -145,13 +151,24 @@ void Filter::_orderedInsert(long value, long pos) {
 } 
 
 // signal to noise ratio, defined as mean divided by standard deviation
+// returns percentage (long, rather than float)
 // TODO: implement different SNR algorithms
-long Filter::signalToNoise() { 
+long Filter::signalToNoise() { // FIXME: rename to signalPercentage ? 
+  //long snr; // signal to noise ratio
+  long sp; // signal as percentage
   long sd = stdev(); // NOTE: signalToNoise() relies on stdev() calling mean() 
                      //   to update _mean, this avoids calling mean() twice
-  long snr = (_mean * 10) / sd; 
-  snr = _longRound(snr, 10);   
-  return(snr); 
+  if (sd == 0) { // we don't want to divide by zero
+    sp = 100; // all signal, no noise 
+  } 
+  else { 
+    //snr = (_mean * 1000) / sd; 
+    //snr = _longRound(snr, 10); // FIXME: this should not be 1000, should prob. be 10
+    // TODO: test math here 
+    sp = sd * 1000 / _mean; // using long rather than float 
+    sp = _longRound(sp, 1000) * 100; // multiply by 100 to get percentage
+  } 
+  return(sp); 
 }
 
 long Filter::stdev() { 
