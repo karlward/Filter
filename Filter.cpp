@@ -146,8 +146,13 @@ long Filter::signalPercentage() {
   long sp; // signal percentage
   long sd = stdev(); // NOTE: to avoid calling mean() twice, this method  
                      //   relies on stdev() calling mean()
-  sp = sd * 1000 / _mean; // using long rather than float for math
-  sp = _longRound(sp, 10); // removing only 1 decimal place here, on purpose
+  if (sd == 0) { 
+    sp = 100; 
+  } 
+  else { 
+    sp = sd * 1000 / _mean; // using long rather than float for math
+    sp = _longRound(sp, 10); // removing only 1 decimal place here, on purpose
+  }
   return(sp); 
 }
 
