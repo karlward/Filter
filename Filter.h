@@ -52,8 +52,8 @@ class Filter {
     // return the absolute minimum, smallest value currently in Filter object 
     long minimum(); // absolute minimum only for now
 
-    // signal to noise ratio, ratio of mean to standard deviation
-    long signalToNoise(); 
+    // signal percentage, calculated from ratio of mean to standard deviation
+    long signalPercentage(); 
 
     // return the standard deviation of values currently in Filter object
     long stdev(); 
@@ -76,8 +76,8 @@ class Filter {
     // methods
     long _longRound(long input, long multiplier); 
     void _moveOver(long start, long end); 
-    void _orderedInsert(long value, long pos);
-    void _orderedInsert2(long value);
+    void _orderedInsertRecursive(long value, long pos);
+    void _orderedInsert(long value);
 };
 
 #endif
