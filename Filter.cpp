@@ -58,6 +58,31 @@ void Filter::put(long value) {
   }
 }
 
+String Filter::describe() { 
+  String description = String("stored values count: "); 
+  description.concat(_valuesCount); 
+  description.concat(" of "); 
+  description.concat(_sampleSize); 
+  description.concat("\n"); 
+
+  description.concat("values: "); 
+  for (long i=0; i < _valuesCount; i++) { 
+    description.concat(_values[i]); 
+    description.concat(' '); 
+  } 
+  description.concat("\n"); 
+  return(description);  
+}
+
+long Filter::maximum() { 
+  for (long i=0; i < _valuesCount; i++) { 
+    if ((i == 0) || (_values[i] > _maximum)) { 
+      _maximum = _values[i]; 
+    } 
+  } 
+  return(_maximum); 
+} 
+
 long Filter::mean() { 
   long sum = 0;
   // sum all values
@@ -101,6 +126,57 @@ long Filter::median() {
   return(_median); 
 }
 
+long Filter::minimum() { 
+  for (long i=0; i < _valuesCount; i++) { 
+    if ((i == 0) || (_values[i] < _minimum)) { 
+      _minimum = _values[i]; 
+    } 
+  } 
+  return(_minimum); 
+} 
+
+// signal percentage, defined as mean divided by standard deviation
+long Filter::signalPercentage() { 
+  long sp; // signal percentage
+  long sd = stdev(); // NOTE: to avoid calling mean() twice, this method  
+                     //   relies on stdev() calling mean()
+  if (sd == 0) { 
+    sp = 100; 
+  } 
+  else { 
+    sp = sd * 1000 / _mean; // using long rather than float for math
+    sp = _longRound(sp, 10); // removing only 1 decimal place here, on purpose
+  }
+  return(sp); 
+}
+
+long Filter::stdev() { 
+  // make sure we have the most recent mean calculated
+  mean();
+
+  // standard deviation calculation  
+  long sum = 0; 
+  for (long i=0; i < _valuesCount; i++) { 
+    sum += sq(_values[i] - _mean) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
+  } 
+  _stdev = sqrt(sum / _valuesCount);
+  _stdev = _longRound(_stdev, 10); // round and undo that multiplier of 10
+
+  return(_stdev); 
+} 
+
+// private methods
+
+long Filter::_longRound(long input, long multiplier) { 
+  if (input % multiplier < (multiplier/2)) { 
+    input = input / multiplier; // round down 
+  }
+  else { 
+    input = (input / multiplier) + 1; // round up
+  } 
+  return(input); 
+}
+
 void Filter::_moveOver(long start, long end) { 
   for (long i = end; i > start; i--) { 
     _medianValues[i] = _medianValues[i-1]; 
@@ -139,78 +215,4 @@ void Filter::_orderedInsertRecursive(long value, long pos) {
       _orderedInsertRecursive(value, pos+1); 
     }
   }
-} 
-
-// signal percentage, defined as mean divided by standard deviation
-long Filter::signalPercentage() { 
-  long sp; // signal percentage
-  long sd = stdev(); // NOTE: to avoid calling mean() twice, this method  
-                     //   relies on stdev() calling mean()
-  if (sd == 0) { 
-    sp = 100; 
-  } 
-  else { 
-    sp = sd * 1000 / _mean; // using long rather than float for math
-    sp = _longRound(sp, 10); // removing only 1 decimal place here, on purpose
-  }
-  return(sp); 
-}
-
-long Filter::stdev() { 
-  // make sure we have the most recent mean calculated
-  mean();
-
-  // standard deviation calculation  
-  long sum = 0; 
-  for (long i=0; i < _valuesCount; i++) { 
-    sum += sq(_values[i] - _mean) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
-  } 
-  _stdev = sqrt(sum / _valuesCount);
-  _stdev = _longRound(_stdev, 10); // round and undo that multiplier of 10
-
-  return(_stdev); 
-} 
-
-long Filter::_longRound(long input, long multiplier) { 
-  if (input % multiplier < (multiplier/2)) { 
-    input = input / multiplier; // round down 
-  }
-  else { 
-    input = (input / multiplier) + 1; // round up
-  } 
-  return(input); 
-} 
-
-long Filter::maximum() { 
-  for (long i=0; i < _valuesCount; i++) { 
-    if ((i == 0) || (_values[i] > _maximum)) { 
-      _maximum = _values[i]; 
-    } 
-  } 
-  return(_maximum); 
-} 
-
-long Filter::minimum() { 
-  for (long i=0; i < _valuesCount; i++) { 
-    if ((i == 0) || (_values[i] < _minimum)) { 
-      _minimum = _values[i]; 
-    } 
-  } 
-  return(_minimum); 
-} 
-
-String Filter::describe() { 
-  String description = String("stored values count: "); 
-  description.concat(_valuesCount); 
-  description.concat(" of "); 
-  description.concat(_sampleSize); 
-  description.concat("\n"); 
-
-  description.concat("values: "); 
-  for (long i=0; i < _valuesCount; i++) { 
-    description.concat(_values[i]); 
-    description.concat(' '); 
-  } 
-  description.concat("\n"); 
-  return(description);  
 }
