@@ -53,6 +53,7 @@ class Filter {
     long minimum(); // absolute minimum only for now
 
     // signal percentage, calculated from ratio of mean to standard deviation
+    // WARNING: only valid if all values are positive
     long signalPercentage(); 
 
     // return the standard deviation of values currently in Filter object
