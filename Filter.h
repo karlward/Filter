@@ -60,7 +60,7 @@ class Filter {
     long stdev(); 
 
   private:
-    // data
+    // private data
     long _maximum; 
     long _mean;
     long _median;
@@ -74,7 +74,7 @@ class Filter {
     long _valuesFirst;
     long _valuesLast;
 
-    // methods
+    // private methods
     long _longRound(long input, long multiplier); 
     void _moveOver(long start, long end); 
     void _orderedInsert(long value);
