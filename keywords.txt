@@ -15,7 +15,9 @@ Filter	KEYWORD1
 describe   KEYWORD2
 maximum   KEYWORD2
 mean   KEYWORD2
+median   KEYWORD2
 minimum   KEYWORD2
 put   KEYWORD2
+signalPercentage   KEYWORD2
 stdev   KEYWORD2
 
