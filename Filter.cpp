@@ -106,7 +106,6 @@ long Filter::median() {
   _medianValues = (long *) malloc(sizeof(long) * (_sampleSize));
   // create an ordered array of the latest values 
   for (long i=0; i < _valuesCount; i++) { 
-    //_orderedInsertRecursive(_values[i], 0); // insert into _medianValues array
     _orderedInsert(_values[i]); 
   } 
   
@@ -183,7 +182,7 @@ void Filter::_moveOver(long start, long end) {
   }
 } 
 
-// non-recursive version, CPU intensive
+// non-recursive ordered insert function, CPU intensive
 void Filter::_orderedInsert(long value) { 
   for (long j = 0; j <= _medianValuesCount; j++) { 
     if (j == _medianValuesCount) { 
@@ -200,19 +199,4 @@ void Filter::_orderedInsert(long value) {
   }
 } 
 
-// NOTE: recursive, memory intensive
-void Filter::_orderedInsertRecursive(long value, long pos) { 
-  if (_medianValuesCount < _valuesCount) { 
-    if (pos == _medianValuesCount) { 
-      _medianValues[pos] = value; 
-      _medianValuesCount++; 
-    }
-    else if (value < _medianValues[pos]) {
-      _orderedInsertRecursive(_medianValues[pos], pos+1); 
-      _medianValues[pos] = value;   
-    } 
-    else if (value >= _medianValues[pos]) { 
-      _orderedInsertRecursive(value, pos+1); 
-    }
-  }
-}
+// NOTE: recursive version of _orderedInsert removed, too memory intensive for Uno

@@ -77,7 +77,6 @@ class Filter {
     // methods
     long _longRound(long input, long multiplier); 
     void _moveOver(long start, long end); 
-    void _orderedInsertRecursive(long value, long pos);
     void _orderedInsert(long value);
 };
 
