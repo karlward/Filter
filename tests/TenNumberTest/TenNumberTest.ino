@@ -1,8 +1,8 @@
 /** 
  * TenNumberTest: simple test code that generates random numbers, stores 
- *   up to 10 of them in a Filter object, and does some basic statistic 
- *   operations on them.  This sketch requires no sensors, but you do need 
- *   to run it on an Arduino board. 
+ * up to 10 of them in a Filter object, and does some basic statistic 
+ * operations on them.  This sketch requires no sensors, but you do need 
+ * to run it on an Arduino board. 
  *
  * Author: Karl Ward
  * License: this example code is released into the public domain
