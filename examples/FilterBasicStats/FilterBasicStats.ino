@@ -33,6 +33,7 @@ void loop() {
 
   // calculate mean, median, and standard deviation
   int analogMean = filteredData.mean(); 
+  int analogMedian = filteredData.median(); 
   int analogMaximum = filteredData.maximum(); 
   int analogMinimum = filteredData.minimum(); 
   int analogStdev = filteredData.stdev(); 
@@ -42,6 +43,8 @@ void loop() {
   Serial.println(analogValue); 
   Serial.print("  mean is "); 
   Serial.println(analogMean); 
+  Serial.print("  median is "); 
+  Serial.println(analogMedian); 
   Serial.print("  maximum is "); 
   Serial.println(analogMaximum);
   Serial.print("  minimum is "); 
