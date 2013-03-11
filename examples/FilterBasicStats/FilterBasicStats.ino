@@ -36,6 +36,7 @@ void loop() {
   int analogMedian = filteredData.median(); 
   int analogMaximum = filteredData.maximum(); 
   int analogMinimum = filteredData.minimum(); 
+  int analogSignalPercentage = filteredData.signalPercentage(); 
   int analogStdev = filteredData.stdev(); 
 
   // output the results to the serial port so you can see them
@@ -49,6 +50,8 @@ void loop() {
   Serial.println(analogMaximum);
   Serial.print("  minimum is "); 
   Serial.println(analogMinimum);
+  Serial.print("  signal percentage is "); 
+  Serial.println(analogSignalPercentage);
   Serial.print("  standard deviation is "); 
   Serial.println(analogStdev); 
 
