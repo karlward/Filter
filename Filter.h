@@ -82,7 +82,7 @@ class Filter {
     long _medianValuesCount;
     long _minimum; 
     long _sampleSize;
-    float _stdev; 
+    long _stdev; 
     long *_values;
     long _valuesCount;
     long _valuesFirst;
