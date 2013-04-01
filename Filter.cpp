@@ -4,7 +4,7 @@
  * The Filter library provides Arduino programmers with data filtering 
  * operations on a configurable number of recent values.
  * 
- * Copyright 2012-2013 Karl Ward
+ * Copyright 2012-2013 Karl Ward and contributors
  * See the file CREDITS for contributors and external code referenced/incorporated
  * See the file COPYING for details on software licensing
  *
@@ -35,6 +35,7 @@ Filter::Filter(long sampleSize) {
   _values = (long *) malloc(sizeof(long) * (_sampleSize+1)); 
   _valuesFirst = _sampleSize; // index to oldest value, initialize to last index
   _valuesLast = _sampleSize; // index to newest value, initialize to last index
+  _valuesUnseenFirst = NULL; // index to oldest unseen value
   _valuesCount = 0; // no values stored yet
   _medianValues = NULL; // _medianValues is undefined until median() is called 
 }
@@ -57,6 +58,19 @@ void Filter::put(long value) {
     _valuesLast = (_valuesLast + 1) % _sampleSize; 
   }
 }
+
+long Filter::get() { 
+  long get; 
+  if (_valuesNextGet == NULL) { // first call to get()
+    _valuesNextGet = _valuesFirst;
+  } 
+
+  get = _valuesNextGet; 
+  _valuesNextGet++; 
+  _valuesNextGet = _valuesNextGet % _sampleSize; 
+  
+  return(_values[get]); 
+} 
 
 String Filter::describe() { 
   String description = String("stored values count: "); 
