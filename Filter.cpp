@@ -4,7 +4,7 @@
  * The Filter library provides Arduino programmers with data filtering 
  * operations on a configurable number of recent values.
  * 
- * Copyright 2012-2013 Karl Ward and contributors
+ * Copyright 2012-2013 Karl Ward, Surya Mattu, Tom Igoe, and contributors
  * See the file CREDITS for contributors and external code referenced/incorporated
  * See the file COPYING for details on software licensing
  *
@@ -22,10 +22,88 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Version 0.5.0 */ 
+/* Version 0.6.0 */ 
 
 #include "Arduino.h"
 #include "Filter.h"
+
+FilterQueue::FilterQueue(long maxSize) {
+  _head = NULL; 
+  _tail = NULL; 
+  _maxSize = maxSize; 
+  _currentSize = 0; 
+} 
+
+long FilterQueue::currentSize() { 
+  return(_currentSize); 
+} 
+
+long FilterQueue::maxSize() { 
+  return(_maxSize); 
+} 
+
+long FilterQueue::read() { 
+  if (_currentSize > 0) { 
+    return(_head->value); 
+  } 
+} 
+
+void FilterQueue::write(long value) { 
+  FilterElement *fe;
+  fe = (FilterElement *) malloc(sizeof(FilterElement)); 
+  fe->value = value; 
+  
+  if (_currentSize == 0) { // first item
+    _head = fe; 
+    _head->value = value; 
+    _head->_next = NULL; // only one item, so nothing before...
+    _head->_prev = NULL; // ...and nothing after
+    _tail = _head; // head and tail are the same element when only one element exists
+    _currentSize = 1; 
+  } 
+  else if (_currentSize < _maxSize) { // queue is partially populated
+    //save pointer to former newest element
+    FilterElement *oldTail = _tail; 
+    // insert the new item at the tail
+    oldTail->_next = fe; 
+    _tail = fe; 
+    _tail->_prev = oldTail; 
+    _tail->_next = NULL; 
+    _currentSize++; 
+  }
+  else { // queue is full
+    // save pointer to oldest element
+    FilterElement *oldHead = _head; 
+
+    if (_maxSize == 1) { // special case
+      _head = fe; 
+      _tail = fe; 
+      _head->_prev = NULL; 
+      _head->_next = NULL; 
+    } 
+    else { 
+      // save pointer to newest element
+      FilterElement *oldTail = _tail; 
+
+      if (_currentSize > 1) { 
+        _head = _head->_next; // make second-oldest element the oldest element
+        _head->_prev = NULL; // oldest element has no previous element 
+      } 
+      // insert the new item at the tail
+      _tail->_next = fe; 
+      _tail = fe; 
+      _tail->_prev = oldTail; 
+      _tail->_next = NULL; 
+    } 
+    // free the memory associated with oldest element
+    free(oldHead); 
+  }
+} 
+// end FilterQueue class 
+
+/* 
+ * Filter class 
+ */
 
 // Constructor
 Filter::Filter(long sampleSize) {
@@ -58,19 +136,6 @@ void Filter::put(long value) {
     _valuesLast = (_valuesLast + 1) % _sampleSize; 
   }
 }
-
-long Filter::get() { 
-  long get; 
-  if (_valuesNextGet == NULL) { // first call to get()
-    _valuesNextGet = _valuesFirst;
-  } 
-
-  get = _valuesNextGet; 
-  _valuesNextGet++; 
-  _valuesNextGet = _valuesNextGet % _sampleSize; 
-  
-  return(_values[get]); 
-} 
 
 String Filter::describe() { 
   String description = String("stored values count: "); 
