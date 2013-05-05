@@ -28,28 +28,7 @@
 #define Filter_h 
 
 #include "Arduino.h"
-
-// FilterElement is a simple struct-based type
-typedef struct FilterElement { 
-  long value; // the value currently stored within the FilterElement
-  FilterElement *_next; 
-  FilterElement *_prev; 
-} FilterElement; 
-
-class FilterQueue { 
-  public: 
-    FilterQueue(long maxSize); // constructor, arg is max size
-    long currentSize(); // current number of elements within FilterQueue object
-    long maxSize(); // largest number of elements that can be stored within object
-    long read(); // return oldest element
-    void write(long value); // add newest element
-
-  private: 
-    long _currentSize; 
-    FilterElement *_head; 
-    long _maxSize; 
-    FilterElement *_tail; 
-}; 
+#include "FilterQueue.h"
 
 class Filter {
   public:
@@ -60,7 +39,7 @@ class Filter {
 
     // DATA STRUCTURE METHODS 
     // put a new value into the Filter object, discarding oldest value if necessary
-    void put(long value); 
+    void write(long value); 
 
 
     // GENERAL PURPOSE METHODS
@@ -93,21 +72,14 @@ class Filter {
     long _maximum; 
     long _mean;
     long _median;
-    long *_medianValues;
-    long _medianValuesCount;
+    FilterQueue _medianValues;
     long _minimum; 
     long _sampleSize;
     long _stdev; 
-    long *_values;
-    long _valuesCount;
-    long _valuesFirst;
-    long _valuesLast;
-    long _valuesUnseenFirst;
+    FilterQueue _values;
 
     // private methods
     long _longRound(long input, long multiplier); 
-    void _moveOver(long start, long end); 
-    void _orderedInsert(long value);
 };
 
 #endif

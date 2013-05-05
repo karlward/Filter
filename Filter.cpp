@@ -26,192 +26,102 @@
 
 #include "Arduino.h"
 #include "Filter.h"
-
-FilterQueue::FilterQueue(long maxSize) {
-  _head = NULL; 
-  _tail = NULL; 
-  _maxSize = maxSize; 
-  _currentSize = 0; 
-} 
-
-long FilterQueue::currentSize() { 
-  return(_currentSize); 
-} 
-
-long FilterQueue::maxSize() { 
-  return(_maxSize); 
-} 
-
-long FilterQueue::read() { 
-  if (_currentSize > 0) { 
-    return(_head->value); 
-  } 
-} 
-
-void FilterQueue::write(long value) { 
-  FilterElement *fe;
-  fe = (FilterElement *) malloc(sizeof(FilterElement)); 
-  fe->value = value; 
-  
-  if (_currentSize == 0) { // first item
-    _head = fe; 
-    _head->value = value; 
-    _head->_next = NULL; // only one item, so nothing before...
-    _head->_prev = NULL; // ...and nothing after
-    _tail = _head; // head and tail are the same element when only one element exists
-    _currentSize = 1; 
-  } 
-  else if (_currentSize < _maxSize) { // queue is partially populated
-    //save pointer to former newest element
-    FilterElement *oldTail = _tail; 
-    // insert the new item at the tail
-    oldTail->_next = fe; 
-    _tail = fe; 
-    _tail->_prev = oldTail; 
-    _tail->_next = NULL; 
-    _currentSize++; 
-  }
-  else { // queue is full
-    // save pointer to oldest element
-    FilterElement *oldHead = _head; 
-
-    if (_maxSize == 1) { // special case
-      _head = fe; 
-      _tail = fe; 
-      _head->_prev = NULL; 
-      _head->_next = NULL; 
-    } 
-    else { 
-      // save pointer to newest element
-      FilterElement *oldTail = _tail; 
-
-      if (_currentSize > 1) { 
-        _head = _head->_next; // make second-oldest element the oldest element
-        _head->_prev = NULL; // oldest element has no previous element 
-      } 
-      // insert the new item at the tail
-      _tail->_next = fe; 
-      _tail = fe; 
-      _tail->_prev = oldTail; 
-      _tail->_next = NULL; 
-    } 
-    // free the memory associated with oldest element
-    free(oldHead); 
-  }
-} 
-// end FilterQueue class 
-
-/* 
- * Filter class 
- */
+#include "FilterQueue.h"
 
 // Constructor
 Filter::Filter(long sampleSize) {
   // sample size indicates how many values to store for mean, median, etc. 
   _sampleSize = sampleSize; 
-  // object will store values in array (well, pointer) of specified size, plus 1
-  _values = (long *) malloc(sizeof(long) * (_sampleSize+1)); 
-  _valuesFirst = _sampleSize; // index to oldest value, initialize to last index
-  _valuesLast = _sampleSize; // index to newest value, initialize to last index
-  _valuesUnseenFirst = NULL; // index to oldest unseen value
-  _valuesCount = 0; // no values stored yet
-  _medianValues = NULL; // _medianValues is undefined until median() is called 
+  _values.setMaxSize(sampleSize); // this is where the Filter object stores values
 }
 
-void Filter::put(long value) {
-  if ((_valuesFirst == _sampleSize) || (_valuesLast == _sampleSize)) { // no values yet 
-    _values[0] = value; 
-    _valuesFirst = 0; 
-    _valuesLast = 0; 
-    _valuesCount++; 
-  } 
-  else if (_valuesCount < _sampleSize) { // not full of values yet
-    _valuesLast = (_valuesLast + 1) % _sampleSize; 
-    _values[_valuesLast] = value; 
-    _valuesCount++; 
-  } 
-  else { // overwriting old values now
-    _values[_valuesFirst] = value; 
-    _valuesFirst = (_valuesFirst + 1) % _sampleSize; 
-    _valuesLast = (_valuesLast + 1) % _sampleSize; 
-  }
+void Filter::write(long value) {
+  _values.write(value); 
 }
 
 String Filter::describe() { 
   String description = String("stored values count: "); 
-  description.concat(_valuesCount); 
+  description.concat(_values.currentSize()); 
   description.concat(" of "); 
-  description.concat(_sampleSize); 
+  description.concat(_values.maxSize()); 
   description.concat("\n"); 
 
   description.concat("values: "); 
-  for (long i=0; i < _valuesCount; i++) { 
-    description.concat(_values[i]); 
+  FilterElement * cur; 
+  cur = _values._head; 
+  while (cur != NULL) { 
+    description.concat((long) cur->value); 
     description.concat(' '); 
+    cur = cur->_next; 
   } 
+    
   description.concat("\n"); 
   return(description);  
 }
 
 long Filter::maximum() { 
-  for (long i=0; i < _valuesCount; i++) { 
-    if ((i == 0) || (_values[i] > _maximum)) { 
-      _maximum = _values[i]; 
+  FilterElement *cur; 
+  cur = _values._head; 
+  _maximum = cur->value; // slightly redundant, done to avoid comparison against undefined value
+  while(cur != NULL) { 
+    if (cur->value > _maximum) { 
+      _maximum = cur->value; 
     } 
-  } 
+    cur = cur->_next; 
+  }
   return(_maximum); 
 } 
 
 long Filter::mean() { 
-  long sum = 0;
-  // sum all values
-  // NOTE: we're doing floating point math in long rather than using floats
-  for (long i=0; i < _valuesCount; i++) { 
-    sum = sum + (_values[i] * 10); // multiply by 10 to do FP math
+  FilterElement *cur;
+  cur = _values._head;
+  long sum = 0; 
+  while(cur != NULL) {
+    sum = sum + (cur->value * 10);
+    cur = cur->_next;
   }
-  _mean = sum / _valuesCount;
+  _mean = sum / _values.currentSize();
   _mean = _longRound(_mean, 10); 
   return(_mean); 
 }
 
 long Filter::median() { 
-  // erase any previous values used to determine median
-  if (_medianValues != NULL) { 
-    free(_medianValues); 
-    _medianValues = NULL; 
-    _medianValuesCount = 0; 
-  } 
-  // allocate memory to store ordered set of values
-  _medianValues = (long *) malloc(sizeof(long) * (_sampleSize));
-  // create an ordered array of the latest values 
-  for (long i=0; i < _valuesCount; i++) { 
-    _orderedInsert(_values[i]); 
+  _medianValues.setMaxSize(0); // erase any previous values used to determine median
+  _medianValues.setMaxSize(_values.currentSize()); // allocate memory to store ordered set of values
+ 
+  FilterElement *cur = _values._head; 
+  while (cur != NULL) {  
+    _medianValues.orderedInsert((cur->value)); 
   } 
   
   // median is the element in the middle of the ordered list of values
   long midpoint = 0; 
-  if (_valuesCount > 1) { 
-    midpoint = (_valuesCount - 1) / 2; 
+  if (_values.currentSize() > 1) { 
+    midpoint = (_medianValues.currentSize() - 1) / 2; 
   }
-  if (_valuesCount % 2 == 1) { // we have an odd number of values
-    _median = _medianValues[midpoint]; 
+  if (_values.currentSize() % 2 == 1) { // we have an odd number of values
+    _median = _medianValues.read(midpoint); 
   } 
   else { // we have an even number of values, so get mean of midpoint pair
     // NOTE: we're doing floating point math in long rather than using floats
-    _median = ((_medianValues[midpoint] + _medianValues[midpoint+1]) * 10) / 2;
+    _median = ((_medianValues.read(midpoint) + _medianValues.read(midpoint+1)) * 10) / 2;
     _median = _longRound(_median, 10); 
   }
   return(_median); 
 }
 
 long Filter::minimum() { 
-  for (long i=0; i < _valuesCount; i++) { 
-    if ((i == 0) || (_values[i] < _minimum)) { 
-      _minimum = _values[i]; 
-    } 
-  } 
-  return(_minimum); 
-} 
+  FilterElement *cur;
+  cur = _values._head;
+  _minimum = cur->value; // slightly redundant, done to avoid comparison against undefined value
+  while(cur != NULL) {
+    if (cur->value < _minimum) {
+      _minimum = cur->value;
+    }
+    cur = cur->_next;
+  }
+  return(_minimum);
+}
 
 // signal percentage, defined as mean divided by standard deviation
 long Filter::signalPercentage() { 
@@ -234,12 +144,14 @@ long Filter::stdev() {
 
   // standard deviation calculation  
   long sum = 0; 
-  for (long i=0; i < _valuesCount; i++) { 
-    sum += sq(_values[i] - _mean) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
+  FilterElement *cur; 
+  cur = _values._head;
+  while(cur != NULL) { 
+    sum += sq(cur->value - _mean) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
+    cur = cur->_next; 
   } 
-  _stdev = sqrt(sum / _valuesCount);
+  _stdev = sqrt(sum / _values.currentSize());
   _stdev = _longRound(_stdev, 10); // round and undo that multiplier of 10
-
   return(_stdev); 
 } 
 
@@ -254,28 +166,3 @@ long Filter::_longRound(long input, long multiplier) {
   } 
   return(input); 
 }
-
-void Filter::_moveOver(long start, long end) { 
-  for (long i = end; i > start; i--) { 
-    _medianValues[i] = _medianValues[i-1]; 
-  }
-} 
-
-// non-recursive ordered insert function, CPU intensive
-void Filter::_orderedInsert(long value) { 
-  for (long j = 0; j <= _medianValuesCount; j++) { 
-    if (j == _medianValuesCount) { 
-      _medianValues[j] = value; 
-      _medianValuesCount++; 
-      return; // break out of the loop 
-    }
-    else if (value < _medianValues[j]) {
-      _moveOver(j, _medianValuesCount); 
-      _medianValues[j] = value; 
-      _medianValuesCount++; 
-      return; // break out of the loop  
-    } 
-  }
-} 
-
-// NOTE: recursive version of _orderedInsert removed, too memory intensive for Uno
