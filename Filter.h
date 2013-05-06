@@ -72,7 +72,6 @@ class Filter {
     long _maximum; 
     long _mean;
     long _median;
-    FilterQueue _medianValues;
     long _minimum; 
     long _sampleSize;
     long _stdev; 

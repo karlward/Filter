@@ -49,11 +49,54 @@ long FilterQueue::maxSize() {
   return(_maxSize); 
 } 
 
-void orderedInsert(long value) { 
-  
+void FilterQueue::orderedWrite(long value) { 
+  FilterElement *fe;
+  fe = (FilterElement *) malloc(sizeof(FilterElement)); 
+  fe->value = value; 
+
+  if (_head == NULL) { // first element 
+    _head = fe;
+    _head->_next = NULL; 
+    _head->_prev = NULL; 
+    _tail = _head; 
+    _currentSize++; 
+  } 
+  else { 
+    FilterElement *cur = _head; 
+    while (cur != NULL) { 
+      if (value < cur->value) { 
+        if (cur == _head) { // special case, reset _head
+          fe->_prev = NULL;
+          fe->_next = _head; 
+          _head->_prev = fe; 
+          _head = fe; 
+        } 
+        else { 
+          fe->_prev = cur->_prev; 
+          fe->_next = cur; 
+          cur->_prev->_next = fe; 
+          cur->_prev = fe; 
+        } 
+        _currentSize++; 
+        cur = NULL; // break out of the method
+      } 
+      else if (cur == _tail) { //special case, reset _tail
+        fe->_next = NULL;
+        fe->_prev = _tail; 
+        _tail->_next = fe; 
+        _tail = fe; 
+        _currentSize++; 
+        cur = NULL;; // break out of the method
+      } 
+      else { 
+        cur = cur->_next; 
+      } 
+    }
+  }
 
 } 
 
+// read the oldest value (the head element)
 long FilterQueue::read() { 
   if (_currentSize > 0) { 
     return(_head->value); 

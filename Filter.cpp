@@ -76,7 +76,7 @@ long Filter::mean() {
   FilterElement *cur;
   cur = _values._head;
   long sum = 0; 
-  while(cur != NULL) {
+  while (cur != NULL) {
     sum = sum + (cur->value * 10);
     cur = cur->_next;
   }
@@ -86,12 +86,13 @@ long Filter::mean() {
 }
 
 long Filter::median() { 
-  _medianValues.setMaxSize(0); // erase any previous values used to determine median
+  FilterQueue _medianValues; 
   _medianValues.setMaxSize(_values.currentSize()); // allocate memory to store ordered set of values
  
   FilterElement *cur = _values._head; 
   while (cur != NULL) {  
-    _medianValues.orderedInsert((cur->value)); 
+    _medianValues.orderedWrite((cur->value)); 
+    cur = cur->_next; 
   } 
   
   // median is the element in the middle of the ordered list of values

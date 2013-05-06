@@ -22,7 +22,7 @@ void setup() {
 void loop() { 
   int value = random(0, 1024); 
   // put that sensor value into the Filter object
-  filteredData.put(value); 
+  filteredData.write(value); 
   Serial.print(filteredData.describe()); 
 
   // calculate mean, standard deviation, etc.
