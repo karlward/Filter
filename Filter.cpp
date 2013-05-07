@@ -62,14 +62,14 @@ String Filter::describe() {
 long Filter::maximum() { 
   FilterElement *cur; 
   cur = _values._head; 
-  _maximum = cur->value; // slightly redundant, done to avoid comparison against undefined value
+  long maximum = cur->value; // slightly redundant, done to avoid comparison against undefined value
   while(cur != NULL) { 
-    if (cur->value > _maximum) { 
-      _maximum = cur->value; 
+    if (cur->value > maximum) { 
+      maximum = cur->value; 
     } 
     cur = cur->_next; 
   }
-  return(_maximum); 
+  return(maximum); 
 } 
 
 long Filter::mean() { 
@@ -80,14 +80,15 @@ long Filter::mean() {
     sum = sum + (cur->value * 10);
     cur = cur->_next;
   }
-  _mean = sum / _values.currentSize();
-  _mean = _longRound(_mean, 10); 
-  return(_mean); 
+  long mean = sum / _values.currentSize();
+  mean = _longRound(mean, 10); 
+  return(mean); 
 }
 
 long Filter::median() { 
   FilterQueue _medianValues; 
   _medianValues.setMaxSize(_values.currentSize()); // allocate memory to store ordered set of values
+  long median; 
  
   FilterElement *cur = _values._head; 
   while (cur != NULL) {  
@@ -101,27 +102,27 @@ long Filter::median() {
     midpoint = (_medianValues.currentSize() - 1) / 2; 
   }
   if (_values.currentSize() % 2 == 1) { // we have an odd number of values
-    _median = _medianValues.read(midpoint); 
+    median = _medianValues.read(midpoint); 
   } 
   else { // we have an even number of values, so get mean of midpoint pair
     // NOTE: we're doing floating point math in long rather than using floats
-    _median = ((_medianValues.read(midpoint) + _medianValues.read(midpoint+1)) * 10) / 2;
-    _median = _longRound(_median, 10); 
+    median = ((_medianValues.read(midpoint) + _medianValues.read(midpoint+1)) * 10) / 2;
+    median = _longRound(median, 10); 
   }
-  return(_median); 
+  return(median); 
 }
 
 long Filter::minimum() { 
   FilterElement *cur;
   cur = _values._head;
-  _minimum = cur->value; // slightly redundant, done to avoid comparison against undefined value
+  long minimum = cur->value; // slightly redundant, done to avoid comparison against undefined value
   while(cur != NULL) {
-    if (cur->value < _minimum) {
-      _minimum = cur->value;
+    if (cur->value < minimum) {
+      minimum = cur->value;
     }
     cur = cur->_next;
   }
-  return(_minimum);
+  return(minimum);
 }
 
 // signal percentage, defined as mean divided by standard deviation
@@ -133,27 +134,24 @@ long Filter::signalPercentage() {
     sp = 100; 
   } 
   else { 
-    sp = sd * 1000 / _mean; // using long rather than float for math
+    sp = sd * 1000 / mean(); // using long rather than float for math
     sp = _longRound(sp, 10); // removing only 1 decimal place here, on purpose
   }
   return(sp); 
 }
 
 long Filter::stdev() { 
-  // make sure we have the most recent mean calculated
-  mean();
-
   // standard deviation calculation  
   long sum = 0; 
   FilterElement *cur; 
   cur = _values._head;
   while(cur != NULL) { 
-    sum += sq(cur->value - _mean) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
+    sum += sq(cur->value - mean()) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
     cur = cur->_next; 
   } 
-  _stdev = sqrt(sum / _values.currentSize());
-  _stdev = _longRound(_stdev, 10); // round and undo that multiplier of 10
-  return(_stdev); 
+  long stdev = sqrt(sum / _values.currentSize());
+  stdev = _longRound(stdev, 10); // round and undo that multiplier of 10
+  return(stdev); 
 } 
 
 // private methods

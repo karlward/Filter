@@ -69,12 +69,7 @@ class Filter {
 
   private:
     // private data
-    long _maximum; 
-    long _mean;
-    long _median;
-    long _minimum; 
     long _sampleSize;
-    long _stdev; 
     FilterQueue _values;
 
     // private methods
