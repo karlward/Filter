@@ -28,17 +28,33 @@
 #include "Filter.h"
 #include "FilterQueue.h"
 
+// CONSTRUCTORS
+// Constructor: no-arg version
+Filter::Filter() { 
+  _sampleSize = 0; 
+  _values.setMaxSize(0); // if you use no-arg constructor, you must call setMaxSize() yourself
+} 
+
 // Constructor
 Filter::Filter(long sampleSize) {
   // sample size indicates how many values to store for mean, median, etc. 
   _sampleSize = sampleSize; 
-  _values.setMaxSize(sampleSize); // this is where the Filter object stores values
+  // ensure that Filter object has correct capacity to hold sampleSize elements
+  _values.setMaxSize(sampleSize); 
 }
+
+
+// DATA STRUCTURE METHODS
+void Filter::setMaxSize(long newMaxSize) { 
+  _values.setMaxSize(newMaxSize); 
+} 
 
 void Filter::write(long value) {
   _values.write(value); 
 }
 
+
+// GENERAL PURPOSE METHODS
 String Filter::describe() { 
   String description = String("stored values count: "); 
   description.concat(_values.currentSize()); 
@@ -59,6 +75,8 @@ String Filter::describe() {
   return(description);  
 }
 
+
+// BASIC STATISTICS METHODS
 long Filter::maximum() { 
   FilterElement *cur; 
   cur = _values._head; 

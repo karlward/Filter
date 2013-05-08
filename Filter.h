@@ -32,12 +32,17 @@
 
 class Filter {
   public:
-    // CONSTRUCTOR
+    // CONSTRUCTORS
+    Filter(); // no-arg version; if you use this, you must call setMaxSize() yourself 
+
     // create a Filter that contains up to specified number of values
     Filter(long sampleSize); 
 
 
     // DATA STRUCTURE METHODS 
+    // set the maximum number of elements that can be stored in Filter
+    void setMaxSize(long newMaxSize); 
+
     // put a new value into the Filter object, discarding oldest value if necessary
     void write(long value); 
 
