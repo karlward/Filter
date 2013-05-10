@@ -184,9 +184,9 @@ FilterQueue Filter::mode() {
         Serial.print("writing into mode, index: "); 
         Serial.print(index); 
         Serial.print(" value: "); 
-        Serial.println(ordered.read(index)); 
+        Serial.println(ordered.read(uniqueIndex.read(index))); 
         mode.setMaxSize(mode.currentSize() + 1); 
-        mode.write(ordered.read(index)); 
+        mode.write(ordered.read(uniqueIndex.read(index))); 
       }
       index++; 
       cur = cur->_next;
