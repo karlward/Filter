@@ -177,6 +177,7 @@ FilterQueue Filter::mode() {
       } 
       cur = cur->_next; 
     } 
+    // now find the mode or modes and write them into the mode FilterQueue
     cur = uniqueCount._head; // reusing cur
     index = 0; // reusing cur
     while (cur != NULL) { 
