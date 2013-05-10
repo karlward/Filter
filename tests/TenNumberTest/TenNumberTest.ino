@@ -20,16 +20,18 @@ void setup() {
 } 
 
 void loop() { 
-  int value = random(0, 1024); 
+  Serial.println("--");
+  int value = random(0, 3); 
   // put that sensor value into the Filter object
   filteredData.write(value); 
   Serial.print(filteredData.describe()); 
 
   // calculate mean, standard deviation, etc.
+  int maximum = filteredData.maximum(); 
   int mean = filteredData.mean(); 
   int median = filteredData.median(); 
   int minimum = filteredData.minimum(); 
-  int maximum = filteredData.maximum(); 
+  FilterQueue mode = filteredData.mode();
   int stdev = filteredData.stdev(); 
   int signalPercentage = filteredData.signalPercentage(); 
 

@@ -65,6 +65,9 @@ class Filter {
     // return the absolute minimum, smallest value currently in Filter object 
     long minimum(); // absolute minimum only for now
 
+    // return the mode(s), the most commonly appearing value(s) in the Filter object
+    FilterQueue mode(); 
+
     // signal percentage, calculated from ratio of mean to standard deviation
     // WARNING: only valid if all values are positive
     long signalPercentage(); 
@@ -79,6 +82,7 @@ class Filter {
 
     // private methods
     long _longRound(long input, long multiplier); 
+    FilterQueue _orderedValues(); 
 };
 
 #endif

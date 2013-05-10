@@ -104,27 +104,20 @@ long Filter::mean() {
 }
 
 long Filter::median() { 
-  FilterQueue _medianValues; 
-  _medianValues.setMaxSize(_values.currentSize()); // allocate memory to store ordered set of values
+  FilterQueue medianValues = _orderedValues(); 
   long median; 
  
-  FilterElement *cur = _values._head; 
-  while (cur != NULL) {  
-    _medianValues.orderedWrite((cur->value)); 
-    cur = cur->_next; 
-  } 
-  
   // median is the element in the middle of the ordered list of values
   long midpoint = 0; 
   if (_values.currentSize() > 1) { 
-    midpoint = (_medianValues.currentSize() - 1) / 2; 
+    midpoint = (medianValues.currentSize() - 1) / 2; 
   }
   if (_values.currentSize() % 2 == 1) { // we have an odd number of values
-    median = _medianValues.read(midpoint); 
+    median = medianValues.read(midpoint); 
   } 
   else { // we have an even number of values, so get mean of midpoint pair
     // NOTE: we're doing floating point math in long rather than using floats
-    median = ((_medianValues.read(midpoint) + _medianValues.read(midpoint+1)) * 10) / 2;
+    median = ((medianValues.read(midpoint) + medianValues.read(midpoint+1)) * 10) / 2;
     median = _longRound(median, 10); 
   }
   return(median); 
@@ -142,6 +135,65 @@ long Filter::minimum() {
   }
   return(minimum);
 }
+
+FilterQueue Filter::mode() { 
+  FilterQueue mode(0); 
+  if (_values.currentSize() > 0) { 
+    FilterQueue uniqueIndex(0); 
+    FilterQueue uniqueCount(0); 
+    FilterQueue ordered = _orderedValues(); 
+    FilterElement * cur = ordered._head;
+    long index = 0; 
+    long seen; 
+    // store the index of the first appearance of each value
+    while (cur != NULL) { 
+      if ((index == 0) || (seen != cur->value)) { 
+        uniqueIndex.setMaxSize(uniqueIndex.currentSize() + 1); 
+        uniqueIndex.write(index); 
+        seen = cur->value; 
+      } 
+      index++; 
+      cur = cur->_next; 
+    } 
+    // now use the indexes to count how many times each value appears 
+    cur = uniqueIndex._head; // reusing cur
+    index = 0; // reusing index
+    long mostFreq;
+    while (cur != NULL) { 
+      long count; 
+      if (cur->_next != NULL) { 
+        count = cur->_next->value - cur->value; // FIXME: test
+      } 
+      else { 
+        count = ordered.currentSize() - cur->value; // FIXME: test
+      } 
+      uniqueCount.setMaxSize(uniqueCount.currentSize() + 1); 
+      uniqueCount.write(count);
+      
+      // and find the most frequent value
+      if ((index == 0) || (count >= mostFreq)) { 
+        mostFreq = count; 
+        index++; 
+      } 
+      cur = cur->_next; 
+    } 
+    cur = uniqueCount._head; // reusing cur
+    index = 0; // reusing cur
+    while (cur != NULL) { 
+      if (cur->value == mostFreq) { 
+        Serial.print("writing into mode, index: "); 
+        Serial.print(index); 
+        Serial.print(" value: "); 
+        Serial.println(ordered.read(index)); 
+        mode.setMaxSize(mode.currentSize() + 1); 
+        mode.write(ordered.read(index)); 
+      }
+      index++; 
+      cur = cur->_next;
+    } 
+  } 
+  return(mode); 
+} 
 
 // signal percentage, defined as mean divided by standard deviation
 long Filter::signalPercentage() { 
@@ -183,3 +235,17 @@ long Filter::_longRound(long input, long multiplier) {
   } 
   return(input); 
 }
+
+FilterQueue Filter::_orderedValues() { 
+  FilterQueue medianValues; 
+  medianValues.setMaxSize(_values.currentSize()); // allocate memory to store ordered set of values
+ 
+  FilterElement *cur = _values._head; 
+  while (cur != NULL) {  
+    medianValues.orderedWrite((cur->value)); 
+    cur = cur->_next; 
+  } 
+  
+  return(medianValues); 
+}
+
