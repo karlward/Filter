@@ -41,11 +41,39 @@ FilterQueue::FilterQueue(long maxSize) {
   _currentSize = 0; 
 } 
 
-long FilterQueue::currentSize() { 
+// copy constructor
+FilterQueue::FilterQueue(const FilterQueue& other) {
+  _head = NULL; 
+  _tail = NULL; 
+  _currentSize = 0; 
+  _maxSize = other.maxSize();
+  FilterElement * cur = other._head;
+  while(cur != NULL) {
+    write(cur->value);
+    cur = cur->_next;
+  }
+} 
+
+// assignment operator
+FilterQueue& FilterQueue::operator= (const FilterQueue& other) {
+  _head = NULL; 
+  _tail = NULL; 
+  _currentSize = 0; 
+  _maxSize = other.maxSize(); 
+  FilterElement * cur = other._head;
+  while(cur != NULL) {
+    write(cur->value);
+    cur = cur->_next;
+  }
+  return(*this); 
+}
+
+
+long FilterQueue::currentSize() const { 
   return(_currentSize); 
 } 
 
-long FilterQueue::maxSize() { 
+long FilterQueue::maxSize() const { 
   return(_maxSize); 
 } 
 
@@ -97,14 +125,14 @@ void FilterQueue::orderedWrite(long value) {
 } 
 
 // read the oldest value (the head element)
-long FilterQueue::read() { 
+long FilterQueue::read() const { 
   if (_currentSize > 0) { 
     return(_head->value); 
   } 
 }
 
 // read the value at a specific index
-long FilterQueue::read(long index) { // overloaded method
+long FilterQueue::read(long index) const { // overloaded method
   FilterElement *cur = _head; 
   long i = 0;
   while (cur != NULL) { 

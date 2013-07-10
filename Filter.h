@@ -38,6 +38,12 @@ class Filter {
     // create a Filter that contains up to specified number of values
     Filter(long sampleSize); 
 
+    // copy constructor
+    Filter(const Filter& other);
+
+    // assignment operator
+    Filter& operator= (const Filter& other); 
+
 
     // DATA STRUCTURE METHODS 
     // set the maximum number of elements that can be stored in Filter
@@ -82,7 +88,7 @@ class Filter {
 
     // private methods
     long _longRound(long input, long multiplier); 
-    FilterQueue _orderedValues(); 
+    FilterQueue *_orderedValues(); 
 };
 
 #endif

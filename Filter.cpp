@@ -43,6 +43,29 @@ Filter::Filter(long sampleSize) {
   _values.setMaxSize(sampleSize); 
 }
 
+// Copy constructor
+Filter::Filter(const Filter& other) { 
+  _sampleSize = other._sampleSize; 
+  _values.setMaxSize(_sampleSize); 
+  FilterElement * cur = other._values._head; 
+  while(cur != NULL) { 
+    _values.write(cur->value); 
+    cur = cur->_next; 
+  }
+} 
+
+// Operator assignment overload 
+Filter& Filter::operator= (const Filter& other) {
+  _sampleSize = other._sampleSize; 
+  _values.setMaxSize(_sampleSize); 
+  FilterElement * cur = other._values._head;
+  while(cur != NULL) {
+    _values.write(cur->value);
+    cur = cur->_next;
+  }
+  return(*this); 
+}
+
 
 // DATA STRUCTURE METHODS
 void Filter::setMaxSize(long newMaxSize) { 
@@ -62,13 +85,19 @@ String Filter::describe() {
   description.concat(_values.maxSize()); 
   description.concat("\n"); 
 
+  // show the first ten values
   description.concat("values: "); 
   FilterElement * cur; 
   cur = _values._head; 
-  while (cur != NULL) { 
+  int i = 0; 
+  while ((cur != NULL) && (i < 10)) { 
     description.concat((long) cur->value); 
     description.concat(' '); 
     cur = cur->_next; 
+    i++; 
+  } 
+  if (cur != NULL) { 
+    description.concat('...'); 
   } 
     
   description.concat("\n"); 
@@ -104,20 +133,20 @@ long Filter::mean() {
 }
 
 long Filter::median() { 
-  FilterQueue medianValues = _orderedValues(); 
+  FilterQueue *medianValues = _orderedValues(); 
   long median; 
  
   // median is the element in the middle of the ordered list of values
   long midpoint = 0; 
   if (_values.currentSize() > 1) { 
-    midpoint = (medianValues.currentSize() - 1) / 2; 
+    midpoint = (medianValues->currentSize() - 1) / 2; 
   }
   if (_values.currentSize() % 2 == 1) { // we have an odd number of values
-    median = medianValues.read(midpoint); 
+    median = medianValues->read(midpoint); 
   } 
   else { // we have an even number of values, so get mean of midpoint pair
     // NOTE: we're doing floating point math in long rather than using floats
-    median = ((medianValues.read(midpoint) + medianValues.read(midpoint+1)) * 10) / 2;
+    median = ((medianValues->read(midpoint) + medianValues->read(midpoint+1)) * 10) / 2;
     median = _longRound(median, 10); 
   }
   return(median); 
@@ -137,16 +166,17 @@ long Filter::minimum() {
 }
 
 FilterQueue Filter::mode() { 
-  FilterQueue mode(0); 
+  FilterQueue mode(0); // FIXME: malloc? 
   if (_values.currentSize() > 0) { 
     FilterQueue uniqueIndex(0); 
     FilterQueue uniqueCount(0); 
-    FilterQueue ordered = _orderedValues(); 
-    FilterElement * cur = ordered._head;
+    FilterQueue *ordered = _orderedValues(); 
+    FilterElement * cur = ordered->_head;
     long index = 0; 
     long seen; 
     // store the index of the first appearance of each value
     while (cur != NULL) { 
+      Serial.println("mode stage 1"); 
       if ((index == 0) || (seen != cur->value)) { 
         uniqueIndex.setMaxSize(uniqueIndex.currentSize() + 1); 
         uniqueIndex.write(index); 
@@ -160,12 +190,17 @@ FilterQueue Filter::mode() {
     index = 0; // reusing index
     long mostFreq;
     while (cur != NULL) { 
+      Serial.println("mode stage 2"); 
       long count; 
       if (cur->_next != NULL) { 
         count = cur->_next->value - cur->value; // FIXME: test
+        //Serial.print("count: "); 
+        //Serial.println(count); 
       } 
       else { 
-        count = ordered.currentSize() - cur->value; // FIXME: test
+        count = ordered->currentSize() - cur->value; // FIXME: test
+        //Serial.print("count: "); 
+        //Serial.println(count); 
       } 
       uniqueCount.setMaxSize(uniqueCount.currentSize() + 1); 
       uniqueCount.write(count);
@@ -181,13 +216,14 @@ FilterQueue Filter::mode() {
     cur = uniqueCount._head; // reusing cur
     index = 0; // reusing cur
     while (cur != NULL) { 
+      Serial.println("mode stage 3"); 
       if (cur->value == mostFreq) { 
         Serial.print("writing into mode, index: "); 
         Serial.print(index); 
         Serial.print(" value: "); 
-        Serial.println(ordered.read(uniqueIndex.read(index))); 
+        Serial.println(ordered->read(uniqueIndex.read(index))); 
         mode.setMaxSize(mode.currentSize() + 1); 
-        mode.write(ordered.read(uniqueIndex.read(index))); 
+        mode.write(ordered->read(uniqueIndex.read(index))); 
       }
       index++; 
       cur = cur->_next;
@@ -237,13 +273,18 @@ long Filter::_longRound(long input, long multiplier) {
   return(input); 
 }
 
-FilterQueue Filter::_orderedValues() { 
-  FilterQueue medianValues; 
-  medianValues.setMaxSize(_values.currentSize()); // allocate memory to store ordered set of values
+FilterQueue *Filter::_orderedValues() { 
+  FilterQueue *medianValues; 
+  medianValues = (FilterQueue *) malloc(sizeof(FilterQueue));
+  // FIXME: messy
+  medianValues->_head = NULL;
+  medianValues->_tail = NULL;
+  medianValues->_maxSize = _values.currentSize();
+  medianValues->_currentSize = 0;
  
   FilterElement *cur = _values._head; 
   while (cur != NULL) {  
-    medianValues.orderedWrite((cur->value)); 
+    medianValues->orderedWrite((cur->value)); 
     cur = cur->_next; 
   } 
   

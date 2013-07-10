@@ -21,7 +21,7 @@ void setup() {
 
 void loop() { 
   Serial.println("--");
-  int value = random(0, 3); 
+  int value = random(0, 4); 
   // put that sensor value into the Filter object
   filteredData.write(value); 
   Serial.print(filteredData.describe()); 

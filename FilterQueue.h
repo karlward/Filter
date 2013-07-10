@@ -40,11 +40,14 @@ class FilterQueue {
   public: 
     FilterQueue(); // no arg constructor
     FilterQueue(long maxSize); // constructor, arg is max size
-    long currentSize(); // current number of elements within FilterQueue object
-    long maxSize(); // largest number of elements that can be stored within object
+    FilterQueue(const FilterQueue& other); // copy constructor
+    FilterQueue& operator= (const FilterQueue& other); // assignment operator
+
+    long currentSize() const; // current number of elements within FilterQueue object
+    long maxSize() const; // largest number of elements that can be stored within object
     void orderedWrite(long value); // insert value into object in ascending order
-    long read(); // return oldest element
-    long read(long index); // return oldest element
+    long read() const; // return oldest element
+    long read(long index) const; // return oldest element
     void setMaxSize(long newMaxSize); // set number of elements that can be stored within object
     void write(long value); // add newest element
     friend class Filter; 
