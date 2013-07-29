@@ -28,12 +28,14 @@
 #define Filter_h 
 
 #include "Arduino.h"
-#include "FilterQueue.h"
+
+// See https://github.com/karlward/DataStream
+#include "DataStream.h"
 
 class Filter {
   public:
     // CONSTRUCTORS
-    Filter(); // no-arg version; if you use this, you must call setMaxSize() yourself 
+    Filter(); // no-arg version; if you use this, you must call resize() yourself 
 
     // create a Filter that contains up to specified number of values
     Filter(long sampleSize); 
@@ -47,7 +49,7 @@ class Filter {
 
     // DATA STRUCTURE METHODS 
     // set the maximum number of elements that can be stored in Filter
-    void setMaxSize(long newMaxSize); 
+    void resize(long newMaxSize); 
 
     // put a new value into the Filter object, discarding oldest value if necessary
     void write(long value); 
@@ -72,7 +74,7 @@ class Filter {
     long minimum(); // absolute minimum only for now
 
     // return the mode(s), the most commonly appearing value(s) in the Filter object
-    FilterQueue mode(); 
+    DataStream<long> mode(); 
 
     // signal percentage, calculated from ratio of mean to standard deviation
     // WARNING: only valid if all values are positive
@@ -84,11 +86,11 @@ class Filter {
   private:
     // private data
     long _sampleSize;
-    FilterQueue _values;
+    DataStream<long> _values;
 
     // private methods
     long _longRound(long input, long multiplier); 
-    FilterQueue *_orderedValues(); 
+    DataStream<long>* _orderedValues(); 
 };
 
 #endif

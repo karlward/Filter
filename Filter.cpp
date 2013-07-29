@@ -25,14 +25,14 @@
 /* Version 0.6.0 */ 
 
 #include "Arduino.h"
+#include "DataStream.h"
 #include "Filter.h"
-#include "FilterQueue.h"
 
 // CONSTRUCTORS
 // Constructor: no-arg version
 Filter::Filter() { 
   _sampleSize = 0; 
-  _values.setMaxSize(0); // if you use no-arg constructor, you must call setMaxSize() yourself
+  _values.resize(0); // if you use no-arg constructor, you must call resize() yourself
 } 
 
 // Constructor
@@ -40,16 +40,16 @@ Filter::Filter(long sampleSize) {
   // sample size indicates how many values to store for mean, median, etc. 
   _sampleSize = sampleSize; 
   // ensure that Filter object has correct capacity to hold sampleSize elements
-  _values.setMaxSize(sampleSize); 
+  _values.resize(sampleSize); 
 }
 
 // Copy constructor
 Filter::Filter(const Filter& other) { 
   _sampleSize = other._sampleSize; 
-  _values.setMaxSize(_sampleSize); 
-  FilterElement * cur = other._values._head; 
+  _values.resize(_sampleSize); 
+  StreamItem<long>* cur = other._values._head; 
   while(cur != NULL) { 
-    _values.write(cur->value); 
+    _values.write(cur->read()); 
     cur = cur->_next; 
   }
 } 
@@ -57,10 +57,10 @@ Filter::Filter(const Filter& other) {
 // Operator assignment overload 
 Filter& Filter::operator= (const Filter& other) {
   _sampleSize = other._sampleSize; 
-  _values.setMaxSize(_sampleSize); 
-  FilterElement * cur = other._values._head;
+  _values.resize(_sampleSize); 
+  StreamItem<long>* cur = other._values._head;
   while(cur != NULL) {
-    _values.write(cur->value);
+    _values.write(cur->read());
     cur = cur->_next;
   }
   return(*this); 
@@ -68,8 +68,8 @@ Filter& Filter::operator= (const Filter& other) {
 
 
 // DATA STRUCTURE METHODS
-void Filter::setMaxSize(long newMaxSize) { 
-  _values.setMaxSize(newMaxSize); 
+void Filter::resize(long newMaxSize) { 
+  _values.resize(newMaxSize); 
 } 
 
 void Filter::write(long value) {
@@ -87,11 +87,11 @@ String Filter::describe() {
 
   // show the first ten values
   description.concat("values: "); 
-  FilterElement * cur; 
+  StreamItem<long>* cur; 
   cur = _values._head; 
   int i = 0; 
   while ((cur != NULL) && (i < 10)) { 
-    description.concat((long) cur->value); 
+    description.concat((long) cur->read()); 
     description.concat(' '); 
     cur = cur->_next; 
     i++; 
@@ -107,12 +107,12 @@ String Filter::describe() {
 
 // BASIC STATISTICS METHODS
 long Filter::maximum() { 
-  FilterElement *cur; 
+  StreamItem<long>* cur; 
   cur = _values._head; 
-  long maximum = cur->value; // slightly redundant, done to avoid comparison against undefined value
+  long maximum = cur->read(); // slightly redundant, done to avoid comparison against undefined value
   while(cur != NULL) { 
-    if (cur->value > maximum) { 
-      maximum = cur->value; 
+    if (cur->read() > maximum) { 
+      maximum = cur->read(); 
     } 
     cur = cur->_next; 
   }
@@ -120,11 +120,11 @@ long Filter::maximum() {
 } 
 
 long Filter::mean() { 
-  FilterElement *cur;
+  StreamItem<long>* cur;
   cur = _values._head;
   long sum = 0; 
   while (cur != NULL) {
-    sum = sum + (cur->value * 10);
+    sum = sum + (cur->read() * 10);
     cur = cur->_next;
   }
   long mean = sum / _values.currentSize();
@@ -133,7 +133,7 @@ long Filter::mean() {
 }
 
 long Filter::median() { 
-  FilterQueue *medianValues = _orderedValues(); 
+  DataStream<long>* medianValues = _orderedValues(); 
   long median; 
  
   // median is the element in the middle of the ordered list of values
@@ -153,34 +153,34 @@ long Filter::median() {
 }
 
 long Filter::minimum() { 
-  FilterElement *cur;
+  StreamItem<long>* cur;
   cur = _values._head;
-  long minimum = cur->value; // slightly redundant, done to avoid comparison against undefined value
+  long minimum = cur->read(); // slightly redundant, done to avoid comparison against undefined value
   while(cur != NULL) {
-    if (cur->value < minimum) {
-      minimum = cur->value;
+    if (cur->read() < minimum) {
+      minimum = cur->read();
     }
     cur = cur->_next;
   }
   return(minimum);
 }
 
-FilterQueue Filter::mode() { 
-  FilterQueue mode(0); // FIXME: malloc? 
+DataStream<long> Filter::mode() { 
+  DataStream<long> mode(0); // FIXME: malloc? 
   if (_values.currentSize() > 0) { 
-    FilterQueue uniqueIndex(0); 
-    FilterQueue uniqueCount(0); 
-    FilterQueue *ordered = _orderedValues(); 
-    FilterElement * cur = ordered->_head;
+    DataStream<long> uniqueIndex(0); 
+    DataStream<long> uniqueCount(0); 
+    DataStream<long>* ordered = _orderedValues(); 
+    StreamItem<long>* cur = ordered->_head;
     long index = 0; 
     long seen; 
     // store the index of the first appearance of each value
     while (cur != NULL) { 
       Serial.println("mode stage 1"); 
-      if ((index == 0) || (seen != cur->value)) { 
-        uniqueIndex.setMaxSize(uniqueIndex.currentSize() + 1); 
+      if ((index == 0) || (seen != cur->read())) { 
+        uniqueIndex.resize(uniqueIndex.currentSize() + 1); 
         uniqueIndex.write(index); 
-        seen = cur->value; 
+        seen = cur->read(); 
       } 
       index++; 
       cur = cur->_next; 
@@ -193,16 +193,16 @@ FilterQueue Filter::mode() {
       Serial.println("mode stage 2"); 
       long count; 
       if (cur->_next != NULL) { 
-        count = cur->_next->value - cur->value; // FIXME: test
+        count = cur->_next->read() - cur->read(); // FIXME: test
         //Serial.print("count: "); 
         //Serial.println(count); 
       } 
       else { 
-        count = ordered->currentSize() - cur->value; // FIXME: test
+        count = ordered->currentSize() - cur->read(); // FIXME: test
         //Serial.print("count: "); 
         //Serial.println(count); 
       } 
-      uniqueCount.setMaxSize(uniqueCount.currentSize() + 1); 
+      uniqueCount.resize(uniqueCount.currentSize() + 1); 
       uniqueCount.write(count);
       
       // and find the most frequent value
@@ -212,17 +212,17 @@ FilterQueue Filter::mode() {
       } 
       cur = cur->_next; 
     } 
-    // now find the mode or modes and write them into the mode FilterQueue
+    // now find the mode or modes and write them into the mode DataStream
     cur = uniqueCount._head; // reusing cur
     index = 0; // reusing cur
     while (cur != NULL) { 
       Serial.println("mode stage 3"); 
-      if (cur->value == mostFreq) { 
+      if (cur->read() == mostFreq) { 
         Serial.print("writing into mode, index: "); 
         Serial.print(index); 
         Serial.print(" value: "); 
         Serial.println(ordered->read(uniqueIndex.read(index))); 
-        mode.setMaxSize(mode.currentSize() + 1); 
+        mode.resize(mode.currentSize() + 1); 
         mode.write(ordered->read(uniqueIndex.read(index))); 
       }
       index++; 
@@ -250,10 +250,10 @@ long Filter::signalPercentage() {
 long Filter::stdev() { 
   // standard deviation calculation  
   long sum = 0; 
-  FilterElement *cur; 
+  StreamItem<long>* cur; 
   cur = _values._head;
   while(cur != NULL) { 
-    sum += sq(cur->value - mean()) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
+    sum += sq(cur->read() - mean()) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
     cur = cur->_next; 
   } 
   long stdev = sqrt(sum / _values.currentSize());
@@ -273,18 +273,18 @@ long Filter::_longRound(long input, long multiplier) {
   return(input); 
 }
 
-FilterQueue *Filter::_orderedValues() { 
-  FilterQueue *medianValues; 
-  medianValues = (FilterQueue *) malloc(sizeof(FilterQueue));
+DataStream<long>* Filter::_orderedValues() { 
+  DataStream<long>* medianValues; 
+  medianValues = (DataStream<long>*) malloc(sizeof(DataStream<long>));
   // FIXME: messy
   medianValues->_head = NULL;
   medianValues->_tail = NULL;
   medianValues->_maxSize = _values.currentSize();
   medianValues->_currentSize = 0;
  
-  FilterElement *cur = _values._head; 
+  StreamItem<long>* cur = _values._head; 
   while (cur != NULL) {  
-    medianValues->orderedWrite((cur->value)); 
+    medianValues->writeOrdered((cur->read())); 
     cur = cur->_next; 
   } 
   

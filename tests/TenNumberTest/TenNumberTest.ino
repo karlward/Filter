@@ -10,6 +10,7 @@
  */
 
 #include "Filter.h"
+#include "DataStream.h"
 
 // we're going to store 10 values for analysis
 Filter filteredData(10); 
@@ -31,7 +32,7 @@ void loop() {
   int mean = filteredData.mean(); 
   int median = filteredData.median(); 
   int minimum = filteredData.minimum(); 
-  FilterQueue mode = filteredData.mode();
+  DataStream<long> mode = filteredData.mode();
   int stdev = filteredData.stdev(); 
   int signalPercentage = filteredData.signalPercentage(); 
 
