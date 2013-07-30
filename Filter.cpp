@@ -37,7 +37,6 @@ Filter::Filter() {
 
 // Constructor
 Filter::Filter(long sampleSize) {
-  // sample size indicates how many values to store for mean, median, etc. 
   _sampleSize = sampleSize; 
   // ensure that Filter object has correct capacity to hold sampleSize elements
   _values.resize(sampleSize); 
@@ -45,25 +44,23 @@ Filter::Filter(long sampleSize) {
 
 // Copy constructor
 Filter::Filter(const Filter& other) { 
-  _sampleSize = other._sampleSize; 
+  _sampleSize = other.capacity();
   _values.resize(_sampleSize); 
-  StreamItem<long>* cur = other._values._head; 
-  while(cur != NULL) { 
-    _values.write(cur->read()); 
-    cur = cur->_next; 
+  unsigned long otherSize = other.available();
+  for (unsigned long i = 0; i < otherSize; i++) {
+    write(other.peek(i));
   }
 } 
 
 // Operator assignment overload 
 Filter& Filter::operator= (const Filter& other) {
-  _sampleSize = other._sampleSize; 
+  _sampleSize = other.capacity(); 
   _values.resize(_sampleSize); 
-  StreamItem<long>* cur = other._values._head;
-  while(cur != NULL) {
-    _values.write(cur->read());
-    cur = cur->_next;
+  unsigned long otherSize= other.available();
+  for (unsigned long i = 0; i < otherSize; i++) {
+    write(other.peek(i));
   }
-  return(*this); 
+  return(*this);
 }
 
 
