@@ -65,6 +65,22 @@ Filter& Filter::operator= (const Filter& other) {
 
 
 // DATA STRUCTURE METHODS
+unsigned long Filter::available() const {
+  return(_values.available());
+}
+
+unsigned long Filter::capacity() const {
+  return(_values.capacity());
+}
+
+long Filter::peek() const {
+  return(_values.peek());
+}
+
+long Filter::peek(const long index) const {
+  return(_values.peek(index));
+}
+
 void Filter::resize(long newMaxSize) { 
   _values.resize(newMaxSize); 
 } 
@@ -77,56 +93,51 @@ void Filter::write(long value) {
 // GENERAL PURPOSE METHODS
 String Filter::describe() { 
   String description = String("stored values count: "); 
-  description.concat(_values.currentSize()); 
+  description.concat(_values.available()); 
   description.concat(" of "); 
-  description.concat(_values.maxSize()); 
+  description.concat(_values.capacity()); 
   description.concat("\n"); 
 
   // show the first ten values
   description.concat("values: "); 
-  StreamItem<long>* cur; 
-  cur = _values._head; 
-  int i = 0; 
-  while ((cur != NULL) && (i < 10)) { 
-    description.concat((long) cur->read()); 
+  long i = 0; 
+  while ((i < _values.available()) && (i < 10)) { 
+    description.concat(_values.peek(i)); 
     description.concat(' '); 
-    cur = cur->_next; 
     i++; 
   } 
-  if (cur != NULL) { 
-    description.concat('...'); 
-  } 
-    
-  description.concat("\n"); 
-  return(description);  
+  if (i < _values.available()) { 
+    description.concat('...');
+  }
+ 
+  description.concat("\n");
+  return(description);
 }
 
 
 // BASIC STATISTICS METHODS
-long Filter::maximum() { 
-  StreamItem<long>* cur; 
-  cur = _values._head; 
-  long maximum = cur->read(); // slightly redundant, done to avoid comparison against undefined value
-  while(cur != NULL) { 
-    if (cur->read() > maximum) { 
-      maximum = cur->read(); 
-    } 
-    cur = cur->_next; 
+long Filter::maximum() {
+  long maximum = _values.peek(0); // slightly redundant, done to avoid comparison against undefined value
+  long i = 0;
+  while(i < _values.available()) {
+    if (_values.peek(i) > maximum) {
+      maximum = _values.peek(i);
+    }
+    i++;
   }
-  return(maximum); 
-} 
+  return(maximum);
+}
 
-long Filter::mean() { 
-  StreamItem<long>* cur;
-  cur = _values._head;
+long Filter::mean() {
   long sum = 0; 
-  while (cur != NULL) {
-    sum = sum + (cur->read() * 10);
-    cur = cur->_next;
+  long i = 0;
+  while (i < _values.available()) {
+    sum = sum + (_values.peek(i) * 10);
+    i++;
   }
-  long mean = sum / _values.currentSize();
-  mean = _longRound(mean, 10); 
-  return(mean); 
+  long mean = sum / _values.available();
+  mean = _longRound(mean, 10);
+  return(mean);
 }
 
 long Filter::median() { 
@@ -135,34 +146,33 @@ long Filter::median() {
  
   // median is the element in the middle of the ordered list of values
   long midpoint = 0; 
-  if (_values.currentSize() > 1) { 
-    midpoint = (medianValues->currentSize() - 1) / 2; 
+  if (_values.available() > 1) { 
+    midpoint = (medianValues->available() - 1) / 2; 
   }
-  if (_values.currentSize() % 2 == 1) { // we have an odd number of values
-    median = medianValues->read(midpoint); 
+  if (_values.available() % 2 == 1) { // we have an odd number of values
+    median = medianValues->peek(midpoint); 
   } 
   else { // we have an even number of values, so get mean of midpoint pair
     // NOTE: we're doing floating point math in long rather than using floats
-    median = ((medianValues->read(midpoint) + medianValues->read(midpoint+1)) * 10) / 2;
+    median = ((medianValues->peek(midpoint) + medianValues->peek(midpoint+1)) * 10) / 2;
     median = _longRound(median, 10); 
   }
   return(median); 
 }
 
 long Filter::minimum() { 
-  StreamItem<long>* cur;
-  cur = _values._head;
-  long minimum = cur->read(); // slightly redundant, done to avoid comparison against undefined value
-  while(cur != NULL) {
-    if (cur->read() < minimum) {
-      minimum = cur->read();
+  long minimum = _values.peek(0); // slightly redundant, done to avoid comparison against undefined value
+  long i = 0;
+  while(i < _values.available()) {
+    if (_values.peek(i) < minimum) {
+      minimum = _values.peek(i);
     }
-    cur = cur->_next;
+    i++;
   }
   return(minimum);
 }
 
-DataStream<long> Filter::mode() { 
+/* DataStream<long> Filter::mode() { 
   DataStream<long> mode(0); // FIXME: malloc? 
   if (_values.currentSize() > 0) { 
     DataStream<long> uniqueIndex(0); 
@@ -227,8 +237,9 @@ DataStream<long> Filter::mode() {
     } 
   } 
   return(mode); 
-} 
+} */
 
+/* 
 // signal percentage, defined as mean divided by standard deviation
 long Filter::signalPercentage() { 
   long sp; // signal percentage
@@ -242,49 +253,43 @@ long Filter::signalPercentage() {
     sp = _longRound(sp, 10); // removing only 1 decimal place here, on purpose
   }
   return(sp); 
-}
+} */
 
-long Filter::stdev() { 
+long Filter::stdev() {
   // standard deviation calculation  
-  long sum = 0; 
-  StreamItem<long>* cur; 
-  cur = _values._head;
-  while(cur != NULL) { 
-    sum += sq(cur->read() - mean()) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
-    cur = cur->_next; 
-  } 
-  long stdev = sqrt(sum / _values.currentSize());
+  long sum = 0;
+  long i = 0;
+  while(i < _values.available()) {
+    sum += sq(_values.peek(i) - mean()) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
+    i++;
+  }
+  long stdev = sqrt(sum / _values.available());
   stdev = _longRound(stdev, 10); // round and undo that multiplier of 10
   return(stdev); 
 } 
 
 // private methods
 
-long Filter::_longRound(long input, long multiplier) { 
-  if (input % multiplier < (multiplier/2)) { 
+long Filter::_longRound(long input, long multiplier) {
+  if (input % multiplier < (multiplier/2)) {
     input = input / multiplier; // round down 
   }
-  else { 
+  else {
     input = (input / multiplier) + 1; // round up
-  } 
-  return(input); 
+  }
+  return(input);
 }
 
-DataStream<long>* Filter::_orderedValues() { 
-  DataStream<long>* medianValues; 
+DataStream<long>* Filter::_orderedValues() {
+  DataStream<long>* medianValues;
   medianValues = (DataStream<long>*) malloc(sizeof(DataStream<long>));
-  // FIXME: messy
-  medianValues->_head = NULL;
-  medianValues->_tail = NULL;
-  medianValues->_maxSize = _values.currentSize();
-  medianValues->_currentSize = 0;
- 
-  StreamItem<long>* cur = _values._head; 
-  while (cur != NULL) {  
-    medianValues->writeOrdered((cur->read())); 
-    cur = cur->_next; 
-  } 
+  medianValues->resize(_values.available());
+  long i = 0;
+  while (i < _values.available()) {
+    medianValues->writeOrdered(_values.peek(i));
+    i++;
+  }
   
-  return(medianValues); 
+  return(medianValues);
 }
 

@@ -48,6 +48,16 @@ class Filter {
 
 
     // DATA STRUCTURE METHODS 
+    // the number of items currently stored in Filter
+    unsigned long available() const;
+
+    // the maximum number of items that could be stored in Filter
+    unsigned long capacity() const;
+
+    // read an item from Filter without removing it
+    long peek() const;
+    long peek(const long index) const;
+
     // set the maximum number of elements that can be stored in Filter
     void resize(long newMaxSize); 
 
@@ -72,14 +82,14 @@ class Filter {
 
     // return the absolute minimum, smallest value currently in Filter object 
     long minimum(); // absolute minimum only for now
-
+/*
     // return the mode(s), the most commonly appearing value(s) in the Filter object
     DataStream<long> mode(); 
 
     // signal percentage, calculated from ratio of mean to standard deviation
     // WARNING: only valid if all values are positive
     long signalPercentage(); 
-
+*/
     // return the standard deviation of values currently in Filter object
     long stdev(); 
 
