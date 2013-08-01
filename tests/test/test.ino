@@ -237,9 +237,32 @@ test(stdev) {
   assertEqual(0, f1.stdev());
   f1.write(500);
   assertEqual(250, f1.stdev());
-  f1.write(200000);
-  assertEqual(99750, f1.stdev());
+  f1.write(2000);
+  assertEqual(750, f1.stdev());
+  
+  Filter f2 = Filter(10);
+  f2.write(100);
+  assertEqual(0, f2.stdev());
+  f2.write(3090);
+  assertEqual(1495, f2.stdev());
+  f2.write(184);
+  assertEqual(1390, f2.stdev());  
+  f2.write(-1);
+  assertEqual(1299, f2.stdev());
+  f2.write(0);
+  assertEqual(1210, f2.stdev());
+  f2.write(88);
+  assertEqual(1126, f2.stdev());
+  f2.write(-2009);  
+  assertEqual(1380, f2.stdev());
+  f2.write(1);
+  assertEqual(1293, f2.stdev());
+  f2.write(97);
+  assertEqual(1219, f2.stdev());
+  f2.write(3500);
+  assertEqual(1528, f2.stdev());
 }
+
 /*
 
 test(mode) {
