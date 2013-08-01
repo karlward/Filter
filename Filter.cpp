@@ -63,7 +63,6 @@ Filter& Filter::operator= (const Filter& other) {
   return(*this);
 }
 
-// FIXME: implement destructor
 
 // DATA STRUCTURE METHODS
 unsigned long Filter::available() const {
