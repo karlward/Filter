@@ -67,31 +67,27 @@ class Filter {
 
     // GENERAL PURPOSE METHODS
     // return a string describing the state of the object
-    String describe(); 
+    String describe() const; 
 
 
     // BASIC STATISTICS METHODS
     // return the absolute maximum, largest value currently in Filter object 
-    long maximum(); // absolute maximum only for now
+    long maximum() const; // absolute maximum only for now
 
     // return the mean, average of values currently in Filter object
-    long mean(); 
+    long mean() const; 
 
     // return the median, most commonly appearing value in Filter object
-    long median(); 
+    long median() const; 
 
     // return the absolute minimum, smallest value currently in Filter object 
-    long minimum(); // absolute minimum only for now
+    long minimum() const; // absolute minimum only for now
 /*
     // return the mode(s), the most commonly appearing value(s) in the Filter object
-    DataStream<long> mode(); 
-
-    // signal percentage, calculated from ratio of mean to standard deviation
-    // WARNING: only valid if all values are positive
-    long signalPercentage(); 
+    DataStream<long> mode() const; 
 */
     // return the standard deviation of values currently in Filter object
-    long stdev(); 
+    long stdev () const; 
 
   private:
     // private data
@@ -99,8 +95,8 @@ class Filter {
     DataStream<long> _values;
 
     // private methods
-    long _longRound(long input, long multiplier); 
-    DataStream<long>* _orderedValues(); 
+    long _longRound(long input, long multiplier) const; 
+    DataStream<long>* _orderedValues() const; 
 };
 
 #endif

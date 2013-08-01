@@ -56,13 +56,14 @@ Filter::Filter(const Filter& other) {
 Filter& Filter::operator= (const Filter& other) {
   _sampleSize = other.capacity(); 
   _values.resize(_sampleSize); 
-  unsigned long otherSize= other.available();
+  unsigned long otherSize = other.available();
   for (unsigned long i = 0; i < otherSize; i++) {
     write(other.peek(i));
   }
   return(*this);
 }
 
+// FIXME: implement destructor
 
 // DATA STRUCTURE METHODS
 unsigned long Filter::available() const {
@@ -91,7 +92,7 @@ void Filter::write(long value) {
 
 
 // GENERAL PURPOSE METHODS
-String Filter::describe() { 
+String Filter::describe() const { 
   String description = String("stored values count: "); 
   description.concat(_values.available()); 
   description.concat(" of "); 
@@ -116,7 +117,7 @@ String Filter::describe() {
 
 
 // BASIC STATISTICS METHODS
-long Filter::maximum() {
+long Filter::maximum() const {
   long maximum = _values.peek(0); // slightly redundant, done to avoid comparison against undefined value
   long i = 0;
   while(i < _values.available()) {
@@ -128,7 +129,7 @@ long Filter::maximum() {
   return(maximum);
 }
 
-long Filter::mean() {
+long Filter::mean() const {
   long sum = 0; 
   long i = 0;
   while (i < _values.available()) {
@@ -140,7 +141,7 @@ long Filter::mean() {
   return(mean);
 }
 
-long Filter::median() { 
+long Filter::median() const { 
   DataStream<long>* medianValues = _orderedValues(); 
   long median; 
  
@@ -160,7 +161,7 @@ long Filter::median() {
   return(median); 
 }
 
-long Filter::minimum() { 
+long Filter::minimum() const { 
   long minimum = _values.peek(0); // slightly redundant, done to avoid comparison against undefined value
   long i = 0;
   while(i < _values.available()) {
@@ -255,13 +256,12 @@ long Filter::signalPercentage() {
   return(sp); 
 } */
 
-long Filter::stdev() {
+// FIXME: stdev() vs stdevp() etc? 
+long Filter::stdev() const {
   // standard deviation calculation  
   long sum = 0;
-  long i = 0;
-  while(i < _values.available()) {
+  for (long i = 0; i < _values.available(); i++) {
     sum += sq(_values.peek(i) - mean()) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
-    i++;
   }
   long stdev = sqrt(sum / _values.available());
   stdev = _longRound(stdev, 10); // round and undo that multiplier of 10
@@ -270,7 +270,7 @@ long Filter::stdev() {
 
 // private methods
 
-long Filter::_longRound(long input, long multiplier) {
+long Filter::_longRound(long input, long multiplier) const {
   if (input % multiplier < (multiplier/2)) {
     input = input / multiplier; // round down 
   }
@@ -280,7 +280,7 @@ long Filter::_longRound(long input, long multiplier) {
   return(input);
 }
 
-DataStream<long>* Filter::_orderedValues() {
+DataStream<long>* Filter::_orderedValues() const {
   DataStream<long>* medianValues;
   medianValues = (DataStream<long>*) malloc(sizeof(DataStream<long>));
   medianValues->resize(_values.available());
