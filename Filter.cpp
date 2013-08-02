@@ -176,8 +176,8 @@ DataStream<long>* Filter::mode() const { // FIXME: should this return a pointer?
   DataStream<long>* mode = (DataStream<long>*) malloc(sizeof(DataStream<long>));
   mode->begin();
   if (_values.available() > 0) {
-    DataStream<long> uniqueIndex = DataStream<long>();
-    DataStream<long> uniqueCount = DataStream<long>();
+    DataStream<long> uniqueIndex = DataStream<long>(0);
+    DataStream<long> uniqueCount = DataStream<long>(0);
     DataStream<long>* ordered = _orderedValues();
 
     long seen;
@@ -214,7 +214,9 @@ DataStream<long>* Filter::mode() const { // FIXME: should this return a pointer?
         mode->write(ordered->peek(uniqueIndex.peek(i)));
       }
     }
-  } 
+    ordered->flush();
+    free(ordered);
+  }
   return(mode); 
 }
 
