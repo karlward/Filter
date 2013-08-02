@@ -263,12 +263,26 @@ test(stdev) {
   assertEqual(1528, f2.stdev());
 }
 
-/*
 
 test(mode) {
-  
+  Filter f0 = Filter(1);
+  f0.write(100);
+  assertEqual(100, f0.mode()->peek(0));
+  assertEqual(1, f0.mode()->available());
+  f0.resize(2);
+  f0.write(100);
+  assertEqual(100, f0.mode()->peek(0));
+  assertEqual(1, f0.mode()->available());
+  f0.write(0);
+  assertEqual(0, f0.mode()->peek(0));
+  assertEqual(100, f0.mode()->peek(1));
+  assertEqual(2, f0.mode()->available());
+  f0.resize(3);
+  f0.write(100);
+  assertEqual(100, f0.mode()->peek(0));
+  assertEqual(1, f0.mode()->available());
 }
-*/
+
 
 void setup() {
   Serial.begin(9600);

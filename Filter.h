@@ -82,10 +82,10 @@ class Filter {
 
     // return the absolute minimum, smallest value currently in Filter object 
     long minimum() const; // absolute minimum only for now
-/*
+
     // return the mode(s), the most commonly appearing value(s) in the Filter object
-    DataStream<long> mode() const; 
-*/
+    DataStream<long>* mode() const; 
+
     // return the standard deviation of values currently in Filter object
     long stdev () const; 
 

@@ -172,88 +172,51 @@ long Filter::minimum() const {
   return(minimum);
 }
 
-/* DataStream<long> Filter::mode() { 
-  DataStream<long> mode(0); // FIXME: malloc? 
-  if (_values.currentSize() > 0) { 
-    DataStream<long> uniqueIndex(0); 
-    DataStream<long> uniqueCount(0); 
-    DataStream<long>* ordered = _orderedValues(); 
-    StreamItem<long>* cur = ordered->_head;
-    long index = 0; 
-    long seen; 
-    // store the index of the first appearance of each value
-    while (cur != NULL) { 
-      Serial.println("mode stage 1"); 
-      if ((index == 0) || (seen != cur->read())) { 
-        uniqueIndex.resize(uniqueIndex.currentSize() + 1); 
-        uniqueIndex.write(index); 
-        seen = cur->read(); 
-      } 
-      index++; 
-      cur = cur->_next; 
-    } 
-    // now use the indexes to count how many times each value appears 
-    cur = uniqueIndex._head; // reusing cur
-    index = 0; // reusing index
-    long mostFreq;
-    while (cur != NULL) { 
-      Serial.println("mode stage 2"); 
-      long count; 
-      if (cur->_next != NULL) { 
-        count = cur->_next->read() - cur->read(); // FIXME: test
-        //Serial.print("count: "); 
-        //Serial.println(count); 
-      } 
-      else { 
-        count = ordered->currentSize() - cur->read(); // FIXME: test
-        //Serial.print("count: "); 
-        //Serial.println(count); 
-      } 
-      uniqueCount.resize(uniqueCount.currentSize() + 1); 
-      uniqueCount.write(count);
-      
-      // and find the most frequent value
-      if ((index == 0) || (count >= mostFreq)) { 
-        mostFreq = count; 
-        index++; 
-      } 
-      cur = cur->_next; 
-    } 
-    // now find the mode or modes and write them into the mode DataStream
-    cur = uniqueCount._head; // reusing cur
-    index = 0; // reusing cur
-    while (cur != NULL) { 
-      Serial.println("mode stage 3"); 
-      if (cur->read() == mostFreq) { 
-        Serial.print("writing into mode, index: "); 
-        Serial.print(index); 
-        Serial.print(" value: "); 
-        Serial.println(ordered->read(uniqueIndex.read(index))); 
-        mode.resize(mode.currentSize() + 1); 
-        mode.write(ordered->read(uniqueIndex.read(index))); 
+DataStream<long>* Filter::mode() const { // FIXME: should this return a pointer? 
+  DataStream<long>* mode = (DataStream<long>*) malloc(sizeof(DataStream<long>));
+  mode->begin();
+  if (_values.available() > 0) {
+    DataStream<long> uniqueIndex = DataStream<long>();
+    DataStream<long> uniqueCount = DataStream<long>();
+    DataStream<long>* ordered = _orderedValues();
+
+    long seen;
+    for (long i = 0; i < ordered->available(); i++) {
+      if (seen != ordered->peek(i)) { // FIXME: NULL comparison
+        uniqueIndex.resize(uniqueIndex.capacity() + 1);
+        uniqueIndex.write(i);
+        seen = ordered->peek(i);
       }
-      index++; 
-      cur = cur->_next;
-    } 
+    }
+
+    // now use the indexes to count how many times each value appears 
+    long mostFreq;
+    for (long i = 0; i < uniqueIndex.available(); i++) {
+      long count;
+      if (i <= (uniqueIndex.available() - 2)) {
+        count = uniqueIndex.peek(i + 1) - uniqueIndex.peek(i); // FIXME: NULL comparison? special cases?
+      }
+      else { 
+        count = ordered->available() - uniqueIndex.peek(i);
+      }
+      uniqueCount.resize(uniqueCount.capacity() + 1);
+      uniqueCount.write(count);
+
+      if ((i == 0) || (count < mostFreq)) {
+        mostFreq = count;
+      }
+    }
+
+    // now find the mode or modes and write them into the mode DataStream
+    for (long i = 0; i < uniqueCount.available(); i++) {
+      if (uniqueCount.peek(i) == mostFreq) {
+        mode->resize(mode->capacity() + 1);
+        mode->write(ordered->peek(uniqueIndex.peek(i)));
+      }
+    }
   } 
   return(mode); 
-} */
-
-/* 
-// signal percentage, defined as mean divided by standard deviation
-long Filter::signalPercentage() { 
-  long sp; // signal percentage
-  long sd = stdev(); // NOTE: to avoid calling mean() twice, this method  
-                     //   relies on stdev() calling mean()
-  if (sd == 0) { 
-    sp = 100; 
-  } 
-  else { 
-    sp = sd * 1000 / mean(); // using long rather than float for math
-    sp = _longRound(sp, 10); // removing only 1 decimal place here, on purpose
-  }
-  return(sp); 
-} */
+}
 
 // FIXME: stdev() vs stdevp() etc? 
 long Filter::stdev() const {
@@ -280,8 +243,8 @@ long Filter::_longRound(long input, long multiplier) const {
 }
 
 DataStream<long>* Filter::_orderedValues() const {
-  DataStream<long>* medianValues;
-  medianValues = (DataStream<long>*) malloc(sizeof(DataStream<long>));
+  DataStream<long>* medianValues = (DataStream<long>*) malloc(sizeof(DataStream<long>));
+  medianValues->begin();
   medianValues->resize(_values.available());
   long i = 0;
   while (i < _values.available()) {
