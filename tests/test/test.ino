@@ -266,23 +266,33 @@ test(stdev) {
 
 test(mode) {
   Filter f0 = Filter(1);
+  DataStream<long>* mode;
   f0.write(100);
-  assertEqual(100, f0.mode()->peek(0));
-  assertEqual(1, f0.mode()->available());
+  mode = f0.mode();
+  assertEqual(100, mode->peek(0));
+  assertEqual(1, mode->available());
+  mode->flush();
+  
   f0.resize(2);
   f0.write(100);
-  assertEqual(100, f0.mode()->peek(0));
-  assertEqual(1, f0.mode()->available());
+  mode = f0.mode();
+  assertEqual(100, mode->peek(0));
+  assertEqual(1, mode->available());
+  mode->flush();
+  
   f0.write(0);
-  assertEqual(0, f0.mode()->peek(0));
-  assertEqual(100, f0.mode()->peek(1));
-  assertEqual(2, f0.mode()->available());
+  mode = f0.mode();
+  assertEqual(0, mode->peek(0));
+  assertEqual(100, mode->peek(1));
+  assertEqual(2, mode->available());
+  mode->flush();
+  
   f0.resize(3);
   f0.write(0);
+  mode = f0.mode();
   assertEqual(100, f0.peek(0));
   assertEqual(0, f0.peek(1));
   assertEqual(0, f0.peek(2));
-  DataStream<long>* mode = f0.mode();
   assertEqual(0, mode->peek(0));
   assertEqual(1, mode->available());
   mode->flush();
