@@ -182,7 +182,7 @@ DataStream<long>* Filter::mode() const { // FIXME: should this return a pointer?
 
     long seen;
     for (long i = 0; i < ordered->available(); i++) {
-      if (seen != ordered->peek(i)) { // FIXME: NULL comparison
+      if ((i == 0) || (seen != ordered->peek(i))) {
         uniqueIndex.resize(uniqueIndex.capacity() + 1);
         uniqueIndex.write(i);
         seen = ordered->peek(i);
@@ -196,8 +196,8 @@ DataStream<long>* Filter::mode() const { // FIXME: should this return a pointer?
       if (i <= (uniqueIndex.available() - 2)) {
         count = uniqueIndex.peek(i + 1) - uniqueIndex.peek(i); // FIXME: NULL comparison? special cases?
       }
-      else { 
-        count = ordered->available() - uniqueIndex.peek(i);
+      else {
+        count = ordered->available() - 1 - uniqueIndex.peek(i);
       }
       uniqueCount.resize(uniqueCount.capacity() + 1);
       uniqueCount.write(count);
