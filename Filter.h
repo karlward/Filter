@@ -54,6 +54,9 @@ class Filter {
     // the maximum number of items that could be stored in Filter
     unsigned long capacity() const;
 
+    // check if a value is present in the Filter object
+    bool contains(long value) const;
+
     // read an item from Filter without removing it
     long peek() const;
     long peek(const long index) const;

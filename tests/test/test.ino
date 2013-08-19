@@ -282,8 +282,9 @@ test(mode) {
   
   f0.write(0);
   mode = f0.mode();
-  assertEqual(0, mode->peek(0));
-  assertEqual(100, mode->peek(1));
+  assertEqual(true, mode->contains(0));
+  assertEqual(true, mode->contains(100));
+  assertEqual(false, mode->contains(888));
   assertEqual(2, mode->available());
   mode->flush();
   

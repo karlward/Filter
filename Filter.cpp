@@ -73,6 +73,16 @@ unsigned long Filter::capacity() const {
   return(_values.capacity());
 }
 
+bool Filter::contains(long value) const {
+  unsigned long count = available();
+  for (unsigned long i=0; i<count; i++) {
+    if (value == peek(i)) {
+      return(true);
+    }
+  }
+  return(false); // if we get this far, the value is not present
+}
+
 long Filter::peek() const {
   return(_values.peek());
 }
