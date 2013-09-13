@@ -1,10 +1,12 @@
 /** 
- * FilterBasicStats: Simple example demonstrating the "Filter" Arduino library
+ * FilterStatsToSerial: Simple example demonstrating the "Filter" Arduino 
+ * library
  * 
  * This code reads an analog sensor and outputs the current value, as well 
  * as the mean, maximum, minimum, and standard deviation values (based on the 
  * last 100 values).  This data is output as text to the Arduino hardware 
- * serial port.  
+ * serial port.  To graph this data, use the FilterProcessingGrapher example
+ * in the Filter examples directory.
  *
  * Author: Karl Ward
  * License: this example code is released into the public domain
