@@ -182,54 +182,6 @@ long Filter::minimum() const {
   return(minimum);
 }
 
-DataStream<long>* Filter::mode() const { // FIXME: should this return a pointer? 
-  DataStream<long>* mode = (DataStream<long>*) malloc(sizeof(DataStream<long>));
-  mode->begin();
-  if (_values.available() > 0) {
-    DataStream<long> uniqueIndex = DataStream<long>(0);
-    DataStream<long> uniqueCount = DataStream<long>(0);
-    DataStream<long>* ordered = _orderedValues();
-
-    long seen;
-    for (long i = 0; i < ordered->available(); i++) {
-      if ((i == 0) || (seen != ordered->peek(i))) {
-        uniqueIndex.resize(uniqueIndex.capacity() + 1);
-        uniqueIndex.write(i);
-        seen = ordered->peek(i);
-      }
-    }
-
-    // now use the indexes to count how many times each value appears 
-    long mostFreq;
-    for (long i = 0; i < uniqueIndex.available(); i++) {
-      long count;
-      if (i <= (uniqueIndex.available() - 2)) {
-        count = uniqueIndex.peek(i + 1) - uniqueIndex.peek(i); // FIXME: NULL comparison? special cases?
-      }
-      else {
-        count = ordered->available() - 1 - uniqueIndex.peek(i);
-      }
-      uniqueCount.resize(uniqueCount.capacity() + 1);
-      uniqueCount.write(count);
-
-      if ((i == 0) || (count < mostFreq)) {
-        mostFreq = count;
-      }
-    }
-
-    // now find the mode or modes and write them into the mode DataStream
-    for (long i = 0; i < uniqueCount.available(); i++) {
-      if (uniqueCount.peek(i) == mostFreq) {
-        mode->resize(mode->capacity() + 1);
-        mode->write(ordered->peek(uniqueIndex.peek(i)));
-      }
-    }
-    ordered->flush();
-    free(ordered);
-  }
-  return(mode); 
-}
-
 // FIXME: stdev() vs stdevp() etc? 
 long Filter::stdev() const {
   // standard deviation calculation  

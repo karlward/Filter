@@ -17,3 +17,5 @@ potentially a lot of change.
 - Code available at https://github.com/karlward/Filter
 - Installation of Arduino libraries (like this one) is described at 
   http://arduino.cc/en/Guide/Libraries
+- You'll also need the Arduino DataStream library, found at 
+  https://github.com/karlward/DataStream

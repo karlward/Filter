@@ -12,6 +12,8 @@
  */
 
 #include "Filter.h"
+// See https://github.com/karlward/DataStream
+#include <DataStream.h>
 
 // we're going to store 100 values for analysis
 Filter filteredData(100); 
@@ -29,14 +31,13 @@ void loop() {
   int analogValue = analogRead(analogPin);
 
   // put that sensor value into the Filter object
-  filteredData.put(analogValue); 
+  filteredData.write(analogValue); 
 
   // calculate mean, median, and standard deviation
   int analogMean = filteredData.mean(); 
   int analogMedian = filteredData.median(); 
   int analogMaximum = filteredData.maximum(); 
   int analogMinimum = filteredData.minimum(); 
-  int analogSignalPercentage = filteredData.signalPercentage(); 
   int analogStdev = filteredData.stdev(); 
 
   // output the results to the serial port so you can see them
@@ -50,10 +51,8 @@ void loop() {
   Serial.println(analogMaximum);
   Serial.print("  minimum is "); 
   Serial.println(analogMinimum);
-  Serial.print("  signal percentage is "); 
-  Serial.println(analogSignalPercentage);
   Serial.print("  standard deviation is "); 
   Serial.println(analogStdev); 
 
-  delay(250); // short delay so we don't flood the serial monitor
+  delay(25); // short delay so we don't flood the serial monitor
 }
