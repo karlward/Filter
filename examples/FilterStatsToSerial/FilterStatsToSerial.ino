@@ -39,7 +39,7 @@ void loop() {
   int analogMean = filteredData.mean(); 
   int analogMaximum = filteredData.maximum(); 
   int analogMinimum = filteredData.minimum(); 
-  int analogStdev = filteredData.stdev(); 
+  int analogStDev = filteredData.stDevPopulation(); 
 
   // output the results to the serial port so you can see them
   Serial.print(analogValue); 
@@ -50,7 +50,7 @@ void loop() {
   Serial.print(","); 
   Serial.print(analogMinimum);
   Serial.print(","); 
-  Serial.println(analogStdev); 
+  Serial.println(analogStDev); 
 
   delay(250); // short delay so we don't flood the serial monitor
 }

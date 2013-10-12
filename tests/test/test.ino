@@ -221,46 +221,46 @@ test(minimum) {
   assertEqual(-200, f2.minimum());
 }
 
-test(stdev) {
+test(stDevPopulation) {
   Filter f0 = Filter(1);
   f0.write(1);
-  assertEqual(0, f0.stdev());
-  assertEqual(0, f0.stdev());
+  assertEqual(0, f0.stDevPopulation());
+  assertEqual(0, f0.stDevPopulation());
   f0.write(10000);
-  assertEqual(0, f0.stdev());
+  assertEqual(0, f0.stDevPopulation());
   
   Filter f1 = Filter(2);
   f1.write(1);
-  assertEqual(0, f1.stdev());
-  assertEqual(0, f1.stdev());
+  assertEqual(0, f1.stDevPopulation());
+  assertEqual(0, f1.stDevPopulation());
   f1.write(1);
-  assertEqual(0, f1.stdev());
+  assertEqual(0, f1.stDevPopulation());
   f1.write(500);
-  assertEqual(250, f1.stdev());
+  assertEqual(250, f1.stDevPopulation());
   f1.write(2000);
-  assertEqual(750, f1.stdev());
+  assertEqual(750, f1.stDevPopulation());
   
   Filter f2 = Filter(10);
   f2.write(100);
-  assertEqual(0, f2.stdev());
+  assertEqual(0, f2.stDevPopulation());
   f2.write(3090);
-  assertEqual(1495, f2.stdev());
+  assertEqual(1495, f2.stDevPopulation());
   f2.write(184);
-  assertEqual(1390, f2.stdev());  
+  assertEqual(1390, f2.stDevPopulation());
   f2.write(-1);
-  assertEqual(1299, f2.stdev());
+  assertEqual(1299, f2.stDevPopulation());
   f2.write(0);
-  assertEqual(1210, f2.stdev());
+  assertEqual(1210, f2.stDevPopulation());
   f2.write(88);
-  assertEqual(1126, f2.stdev());
+  assertEqual(1126, f2.stDevPopulation());
   f2.write(-2009);  
-  assertEqual(1380, f2.stdev());
+  assertEqual(1380, f2.stDevPopulation());
   f2.write(1);
-  assertEqual(1293, f2.stdev());
+  assertEqual(1293, f2.stDevPopulation());
   f2.write(97);
-  assertEqual(1219, f2.stdev());
+  assertEqual(1219, f2.stDevPopulation());
   f2.write(3500);
-  assertEqual(1528, f2.stdev());
+  assertEqual(1528, f2.stDevPopulation());
 }
 
 

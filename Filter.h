@@ -22,7 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Version 0.6.0 */
+/* Version 0.6.1 */
 
 #ifndef Filter_h
 #define Filter_h 
@@ -86,8 +86,11 @@ class Filter {
     // return the absolute minimum, smallest value currently in Filter object 
     long minimum() const; // absolute minimum only for now
 
-    // return the standard deviation of values currently in Filter object
-    long stdev () const; 
+    // return the "population standard deviation" of values currently in Filter object
+    long stDevPopulation() const;
+
+    // return the "sample standard deviation" of values currently in Filter object
+    long stDevSample() const;
 
   private:
     // private data
@@ -97,6 +100,7 @@ class Filter {
     // private methods
     long _longRound(long input, long multiplier) const; 
     DataStream<long>* _orderedValues() const; 
+    long _stDev(bool type) const;
 };
 
 #endif

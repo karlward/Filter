@@ -22,7 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Version 0.6.0 */ 
+/* Version 0.6.1 */ 
 
 #include "Arduino.h"
 #include "DataStream.h"
@@ -182,17 +182,18 @@ long Filter::minimum() const {
   return(minimum);
 }
 
-// FIXME: stdev() vs stdevp() etc? 
-long Filter::stdev() const {
-  // standard deviation calculation  
-  long sum = 0;
-  for (long i = 0; i < _values.available(); i++) {
-    sum += sq(_values.peek(i) - mean()) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
+long Filter::stDevPopulation() const {
+  return(_stDev(0));
+}
+
+long Filter::stDevSample() const {
+  if (_values.available() > 1) {
+    return(_stDev(1));
+  } 
+  else { // FIXME: this silently avoids divide by zero error, revisit
+    return();
   }
-  long stdev = sqrt(sum / _values.available());
-  stdev = _longRound(stdev, 10); // round and undo that multiplier of 10
-  return(stdev); 
-} 
+}
 
 // private methods
 
@@ -219,3 +220,20 @@ DataStream<long>* Filter::_orderedValues() const {
   return(medianValues);
 }
 
+long Filter::_stDev(bool type) const {
+  // standard deviation calculation  
+  long sum = 0;
+  for (long i = 0; i < _values.available(); i++) {
+    sum += sq(_values.peek(i) - mean()) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
+  }
+  int _denominator;
+  if (type == 0) {
+    _denominator = _values.available(); // population
+  } 
+  else {
+    _denominator = _values.available() - 1; // sample
+  }
+  long stDev = sqrt(sum / denominator);
+  stDev = _longRound(stDev, 10); // round and undo that multiplier of 10
+  return(stDev); 
+} 

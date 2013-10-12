@@ -12,12 +12,16 @@ Filter	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
+available   KEYWORD2
+capacity   KEYWORD2
+contains   KEYWORD2
 describe   KEYWORD2
 maximum   KEYWORD2
 mean   KEYWORD2
 median   KEYWORD2
 minimum   KEYWORD2
-put   KEYWORD2
-signalPercentage   KEYWORD2
-stdev   KEYWORD2
+resize   KEYWORD2
+stDevPopulation   KEYWORD2
+stDevSample   KEYWORD2
+write   KEYWORD2
 
