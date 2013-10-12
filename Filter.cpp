@@ -190,8 +190,8 @@ long Filter::stDevSample() const {
   if (_values.available() > 1) {
     return(_stDev(1));
   } 
-  else { // FIXME: this silently avoids divide by zero error, revisit
-    return();
+  else { 
+    return(-1); // FIXME: this silently avoids divide by zero error, revisit
   }
 }
 
@@ -226,12 +226,12 @@ long Filter::_stDev(bool type) const {
   for (long i = 0; i < _values.available(); i++) {
     sum += sq(_values.peek(i) - mean()) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
   }
-  int _denominator;
+  int denominator;
   if (type == 0) {
-    _denominator = _values.available(); // population
+    denominator = _values.available(); // population
   } 
   else {
-    _denominator = _values.available() - 1; // sample
+    denominator = _values.available() - 1; // sample
   }
   long stDev = sqrt(sum / denominator);
   stDev = _longRound(stDev, 10); // round and undo that multiplier of 10
