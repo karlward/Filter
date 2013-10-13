@@ -226,7 +226,7 @@ long Filter::_stDev(bool type) const {
   for (long i = 0; i < _values.available(); i++) {
     sum += sq(_values.peek(i) - mean()) * 100; // i.e. a multiplier of 10 (100 is 10 squared)
   }
-  int denominator;
+  long denominator;
   if (type == 0) {
     denominator = _values.available(); // population
   } 

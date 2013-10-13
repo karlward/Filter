@@ -260,7 +260,7 @@ test(stDevPopulation) {
   f2.write(97);
   assertEqual(1219, f2.stDevPopulation());
   f2.write(3500);
-  //assertEqual(1528, f2.stDevPopulation()); // FIXME: fails
+  assertEqual(1528, f2.stDevPopulation()); // FIXME: fails
 }
 
 
