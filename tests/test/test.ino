@@ -259,8 +259,50 @@ test(stDevPopulation) {
   assertEqual(1293, f2.stDevPopulation());
   f2.write(97);
   assertEqual(1219, f2.stDevPopulation());
-  f2.write(3500);
-  assertEqual(1528, f2.stDevPopulation()); // FIXME: fails
+  f2.write(350);
+  assertEqual(1158, f2.stDevPopulation());
+}
+
+test(stDevSample) {
+  Filter f0 = Filter(1);
+  f0.write(1);
+  assertEqual(-1, f0.stDevSample());
+  assertEqual(-1, f0.stDevSample());
+  f0.write(10000);
+  assertEqual(-1, f0.stDevSample());
+  
+  Filter f1 = Filter(2);
+  f1.write(1);
+  assertEqual(-1, f1.stDevSample());
+  assertEqual(-1, f1.stDevSample());
+  f1.write(1);
+  assertEqual(0, f1.stDevSample());
+  f1.write(500);
+  assertEqual(353, f1.stDevSample());
+  f1.write(2000);
+  assertEqual(1061, f1.stDevSample());
+  
+  Filter f2 = Filter(10);
+  f2.write(100);
+  assertEqual(-1, f2.stDevSample());
+  f2.write(3090);
+  assertEqual(2114, f2.stDevSample());
+  f2.write(184);
+  assertEqual(1703, f2.stDevSample());
+  f2.write(-1);
+  assertEqual(1500, f2.stDevSample());
+  f2.write(0);
+  assertEqual(1352, f2.stDevSample());
+  f2.write(88);
+  assertEqual(1233, f2.stDevSample());
+  f2.write(-2009);  
+  assertEqual(1491, f2.stDevSample());
+  f2.write(1);
+  assertEqual(1382, f2.stDevSample());
+  f2.write(97);
+  assertEqual(1293, f2.stDevSample());
+  f2.write(350);
+  assertEqual(1221, f2.stDevSample());
 }
 
 
