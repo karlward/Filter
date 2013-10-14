@@ -236,4 +236,5 @@ long Filter::_stDev(bool type) const {
   long stDev = sqrt(sum / denominator);
   stDev = _longRound(stDev, 10); // round and undo that multiplier of 10
   return(stDev); 
-} 
+}
+
