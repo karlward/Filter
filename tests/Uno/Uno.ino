@@ -1,7 +1,7 @@
 // See https://github.com/mmurdoch/arduinounit
 #include <ArduinoUnit.h>
 // See https://github.com/karlward/DataStream
-#include <DataStream.h>
+// include <DataStream.h> // FIXME: remove
 // See http://github.com/karlward/Filter
 #include <Filter.h>
 
@@ -305,6 +305,46 @@ test(stDevSample) {
   assertEqual(1221, f2.stDevSample());
 }
 
+void filterEvent(long v) {
+  Serial.print("found value ");
+  Serial.println(v);
+}
+
+long oldMean; // used by meanTest()
+void meanTest(Filter* f) {
+  if (f->mean() != oldMean) {
+    filterEvent(f->mean());
+    oldMean = f->mean();
+  }
+}
+
+void above50(Filter* f) {
+  long i = 0;
+  while (i < f->available()) {
+    long value = f->peek(i);
+    // call filterEvent for any value greater than 50
+    if (value > 50) {
+      filterEvent(value);
+    }
+    i++;
+  }
+}
+
+test(attachFilter) {
+  Filter f1 = Filter(5);
+  f1.attachFilter(meanTest);
+  f1.write(100);
+  f1.write(100);
+  f1.write(100);
+  f1.write(100);
+  f1.write(10);
+  f1.write(1);
+  assertEqual(100, f1.peek(0));
+  assertEqual(100, f1.peek(1));
+  assertEqual(100, f1.peek(2));
+  assertEqual(10, f1.peek(3));
+  assertEqual(1, f1.peek(4));
+}
 
 void setup() {
   Serial.begin(9600);

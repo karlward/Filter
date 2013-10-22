@@ -30,7 +30,7 @@
 #include "Arduino.h"
 
 // See https://github.com/karlward/DataStream
-#include "DataStream.h"
+#include "../DataStream/DataStream.h"
 
 class Filter {
   public:
@@ -60,6 +60,10 @@ class Filter {
     // read an item from Filter without removing it
     long peek() const;
     long peek(const long index) const;
+
+    // read an item from Filter, removing it
+    long read();
+    //long read(const long index); // FIXME: implement in DataStream
 
     // set the maximum number of elements that can be stored in Filter
     void resize(long newMaxSize); 
@@ -101,6 +105,15 @@ class Filter {
     long _longRound(long input, long multiplier) const; 
     DataStream<long>* _orderedValues() const; 
     long _stDev(bool type) const;
+
+    // filterEvent
+    // FIXME: need to call this in the right place, e.g. write()
+    void _runCallback(); // wraps _callback, in case it is null
+    void (*_callback)(Filter* f); // callback that generates filterEvents
+
+  public:
+    // filterEvent
+    void attachFilter(void (*fptr)(Filter* f));
 };
 
 #endif

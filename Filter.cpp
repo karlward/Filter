@@ -25,7 +25,7 @@
 /* Version 0.6.1 */ 
 
 #include "Arduino.h"
-#include "DataStream.h"
+#include "../DataStream/DataStream.h"
 #include "Filter.h"
 
 // CONSTRUCTORS
@@ -33,6 +33,7 @@
 Filter::Filter() { 
   _sampleSize = 0; 
   _values.resize(0); // if you use no-arg constructor, you must call resize() yourself
+  _callback = 0;
 } 
 
 // Constructor
@@ -40,6 +41,7 @@ Filter::Filter(long sampleSize) {
   _sampleSize = sampleSize; 
   // ensure that Filter object has correct capacity to hold sampleSize elements
   _values.resize(sampleSize); 
+  _callback = 0;
 }
 
 // Copy constructor
@@ -50,6 +52,7 @@ Filter::Filter(const Filter& other) {
   for (unsigned long i = 0; i < otherSize; i++) {
     write(other.peek(i));
   }
+  _callback = other._callback;
 } 
 
 // Operator assignment overload 
@@ -60,6 +63,7 @@ Filter& Filter::operator= (const Filter& other) {
   for (unsigned long i = 0; i < otherSize; i++) {
     write(other.peek(i));
   }
+  _callback = other._callback;
   return(*this);
 }
 
@@ -91,12 +95,21 @@ long Filter::peek(const long index) const {
   return(_values.peek(index));
 }
 
+long Filter::read() {
+  return(_values.read());
+}
+
+/*long Filter::read(const long index) {
+  return(_values.read(index));
+}*/
+
 void Filter::resize(long newMaxSize) { 
   _values.resize(newMaxSize); 
 } 
 
 void Filter::write(long value) {
-  _values.write(value); 
+  _values.write(value);
+  _runCallback(); // FIXME: is this the right place to run callback?
 }
 
 
@@ -237,4 +250,17 @@ long Filter::_stDev(bool type) const {
   stDev = _longRound(stDev, 10); // round and undo that multiplier of 10
   return(stDev); 
 }
+
+void Filter::_runCallback() {
+  if (_callback != 0) {
+    _callback(this);
+  }
+}
+
+void Filter::attachFilter(void (*fptr)(Filter* f)) {
+  _callback = fptr;
+}
+
+void filterEvent(long v) __attribute__((weak));
+void filterEvent(long v) {}
 
